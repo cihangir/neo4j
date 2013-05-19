@@ -1,0 +1,90 @@
+package neo4j
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+)
+
+func jsonEncode(value interface{}) (string, error) {
+	jsonValue, err := json.Marshal(value)
+	if err != nil {
+		return "", err
+	}
+	return jsonValue, nil
+}
+
+//here, mapping of decoded json
+func jsonDecode(data string, result *interface{}) error {
+	var source interface{}
+
+	err := json.Unmarshal([]byte(data), &source)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getIdFromUrl(base, url string) (string, error) {
+
+	target := base + "/"
+
+	result := strings.SplitAfter(url, target)
+
+	if len(result) > 1 {
+		return result[1]
+	}
+
+	return "", errors.New("URL not valid")
+}
+
+// Gets URL and string data to be sent and makes request
+// reads response body and returns as string
+func (neo4j *Neo4j) doRequest(requestType, url, data string) (string, error) {
+
+	//convert string into bytestream
+	dataByte := strings.NewReader(data)
+	req, err := http.NewRequest(requestType, url, dataByte)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := neo4j.Client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	//todo return proper error messages with message, excaption and stacktrace
+	switch requestType {
+	case "GET":
+		if res.StatusCode != 200 {
+			return nil, fmt.Errorf(res.Status)
+		}
+	case "POST":
+		if res.StatusCode != 201 {
+			return nil, fmt.Errorf(res.Status)
+		}
+	case "PUT", "DELETE":
+		if res.StatusCode != 204 {
+			return nil, fmt.Errorf(res.Status)
+		}
+		return nil, nil
+	default:
+		return nil, errors.New("not supported request")
+	}
+
+	// read response body
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		//A successful call returns err == nil
+		return "", err
+	}
+
+	return string(body), nil
+
+}
