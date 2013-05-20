@@ -33,7 +33,7 @@ func getIdFromUrl(base, url string) (string, error) {
 	result := strings.SplitAfter(url, target)
 
 	if len(result) > 1 {
-		return result[1]
+		return result[1], nil
 	}
 
 	return "", errors.New("URL not valid")

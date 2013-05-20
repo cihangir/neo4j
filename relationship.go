@@ -1,7 +1,6 @@
 package neo4j
 
 import (
-	"encoding/json"
 	"errors"
 )
 
@@ -128,7 +127,7 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 		return result, err
 	}
 
-	err := jsonDecode(response, &result)
+	err = jsonDecode(response, &result)
 
 	return result, err
 }
@@ -169,7 +168,7 @@ func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error
 		return false, err
 	}
 
-	err := mapRelationship(neo4j, relationship, payload)
+	err = mapRelationship(neo4j, relationship, payload)
 	if err != nil {
 		return false, err
 	}

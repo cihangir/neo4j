@@ -12,7 +12,7 @@ type Node struct {
 }
 
 type NodeResponse struct {
-	PagedTraverse              string                 `json:paged_traverse"`
+	PagedTraverse              string                 `json:"paged_traverse"`
 	OutgoingRelationships      string                 `json:"outgoing_relationships"`
 	Traverse                   string                 `json:"traverse"`
 	AllTypedRelationships      string                 `json:"all_typed_relationships"`
@@ -52,11 +52,6 @@ func (neo4j *Neo4j) GetNode(id string) (*Node, error) {
 	}
 
 	payload, err := node.decodeResponse(response)
-	if err != nil {
-		return nil, err
-	}
-
-	id, err := getIdFromUrl(neo4j.NodeUrl, payload.Self)
 	if err != nil {
 		return nil, err
 	}
@@ -132,19 +127,6 @@ func (neo4j *Neo4j) UpdateNode(node *Node) (bool, error) {
 // response will be object
 // todo add force deletion, because nodes with relationships can not be deleted
 func (neo4j *Neo4j) DeleteNode(id string) (bool, error) {
-
-	url := neo4j.NodeUrl + "/" + id
-
-	//if node not found Neo4j returns 404
-	response, err := neo4j.doRequest("DELETE", url, "")
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (neo4j *Neo4j) GetAllRelationships(id string) (bool, error) {
 
 	url := neo4j.NodeUrl + "/" + id
 

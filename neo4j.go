@@ -1,7 +1,6 @@
 package neo4j
 
 import (
-	"io/ioutil"
 	"net/http"
 	"strconv"
 )
