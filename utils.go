@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 func jsonEncode(value interface{}) (string, error) {
@@ -11,14 +14,13 @@ func jsonEncode(value interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return jsonValue, nil
+	return string(jsonValue), nil
 }
 
 //here, mapping of decoded json
 func jsonDecode(data string, result *interface{}) error {
-	var source interface{}
 
-	err := json.Unmarshal([]byte(data), &source)
+	err := json.Unmarshal([]byte(data), &result)
 	if err != nil {
 		return err
 	}
@@ -63,19 +65,19 @@ func (neo4j *Neo4j) doRequest(requestType, url, data string) (string, error) {
 	switch requestType {
 	case "GET":
 		if res.StatusCode != 200 {
-			return nil, fmt.Errorf(res.Status)
+			return "", fmt.Errorf(res.Status)
 		}
 	case "POST":
 		if res.StatusCode != 201 {
-			return nil, fmt.Errorf(res.Status)
+			return "", fmt.Errorf(res.Status)
 		}
 	case "PUT", "DELETE":
 		if res.StatusCode != 204 {
-			return nil, fmt.Errorf(res.Status)
+			return "", fmt.Errorf(res.Status)
 		}
-		return nil, nil
+		return "", nil
 	default:
-		return nil, errors.New("not supported request")
+		return "", errors.New("not supported request")
 	}
 
 	// read response body
