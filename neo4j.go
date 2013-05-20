@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type Noe4j struct {
+type Neo4j struct {
 	Client          *http.Client
 	BaseUrl         string
 	NodeUrl         string
@@ -13,7 +13,7 @@ type Noe4j struct {
 	IndexNodeUrl    string
 }
 
-func Connect(host string, port int) *Noe4j {
+func Connect(host string, port int) *Neo4j {
 	if host == "" {
 		host = "http://127.0.0.1"
 	}
@@ -22,13 +22,14 @@ func Connect(host string, port int) *Noe4j {
 		port = 7474
 	}
 
-	url = host + ":" + strconv.Itoa(port)
+	url := host + ":" + strconv.Itoa(port)
 
-	return &Noe4j{
+	baseUrl := url + "/db/data"
+	return &Neo4j{
 		Client:          http.DefaultClient,
-		BaseUrl:         url + "/db/data",
-		NodeUrl:         BaseUrl + "/node",
-		IndexNodeUrl:    BaseUrl + "/index/node",
-		RelationshipUrl: BaseUrl + "/relationship",
+		BaseUrl:         baseUrl,
+		NodeUrl:         baseUrl + "/node",
+		IndexNodeUrl:    baseUrl + "/index/node",
+		RelationshipUrl: baseUrl + "/relationship",
 	}
 }
