@@ -27,18 +27,6 @@ type NodeResponse struct {
 	Data                       map[string]interface{} `json:"data"`
 }
 
-func (node *Node) SetId(url string) {
-	node.Id = id
-}
-
-func (node *Node) SetData(data map[string]interface{}) {
-	node.Data = data
-}
-
-func (node *Node) SetPayload(payload *NodeResponse) {
-	node.Payload = payload
-}
-
 // gets node from neo4j with given unique node id
 // response will be object
 func (neo4j *Neo4j) GetNode(id string) (*Node, error) {
@@ -51,16 +39,16 @@ func (neo4j *Neo4j) GetNode(id string) (*Node, error) {
 		return nil, err
 	}
 
+	node := &Node{}
+
 	payload, err := node.decodeResponse(response)
 	if err != nil {
 		return nil, err
 	}
 
-	node := &Node{
-		Id:      id,
-		Data:    payload.Data,
-		Payload: payload,
-	}
+	node.Id = id
+	node.Data = payload.Data
+	node.Payload = payload
 
 	return node, nil
 }
@@ -84,9 +72,11 @@ func (neo4j *Neo4j) CreateNode(node *Node) (bool, error) {
 		return false, err
 	}
 
-	Node.SetData(payload.Data)
+	id, err := getIdFromUrl(neo4j.NodeUrl, payload.Self)
 
-	Node.SetPayload(payload)
+	node.Id = id
+	node.Data = payload.Data
+	node.Payload = payload
 
 	return true, nil
 }
@@ -106,19 +96,10 @@ func (neo4j *Neo4j) UpdateNode(node *Node) (bool, error) {
 
 	url := neo4j.NodeUrl + "/" + node.Id + "/properties"
 
-	response, err := neo4j.doRequest("PUT", url, postData)
+	_, err = neo4j.doRequest("PUT", url, postData)
 	if err != nil {
 		return false, err
 	}
-
-	// payload, err := node.decode(response)
-	// if err != nil {
-	// 	return false, err
-	// }
-
-	// Node.SetData(payload.Data)
-
-	// Node.SetPayload(payload)
 
 	return true, nil
 }
@@ -131,7 +112,7 @@ func (neo4j *Neo4j) DeleteNode(id string) (bool, error) {
 	url := neo4j.NodeUrl + "/" + id
 
 	//if node not found Neo4j returns 404
-	response, err := neo4j.doRequest("DELETE", url, "")
+	_, err := neo4j.doRequest("DELETE", url, "")
 	if err != nil {
 		return false, err
 	}
@@ -139,18 +120,18 @@ func (neo4j *Neo4j) DeleteNode(id string) (bool, error) {
 	return true, nil
 }
 
-func (node *Node) encodeData() string {
+func (node *Node) encodeData() (string, error) {
 	result, err := jsonEncode(node.Data)
 	return result, err
 }
 
-func (node *Node) decodeData(data string) (*NodeResponse, error) {
-	nodeResponse := *NodeResponse
+func (node *Node) decodeResponse(data string) (*NodeResponse, error) {
+	nodeResponse := &NodeResponse{}
 
 	err := json.Unmarshal([]byte(data), nodeResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	return source, nil
+	return nodeResponse, nil
 }
