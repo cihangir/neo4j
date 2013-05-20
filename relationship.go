@@ -1,7 +1,9 @@
 package neo4j
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type Relationship struct {
@@ -36,7 +38,7 @@ func (neo4j *Neo4j) GetRelationship(id string) (*Relationship, error) {
 
 	relationship := &Relationship{}
 
-	payload, err := relationship.decode(response)
+	_, err = relationship.decode(neo4j, response)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +86,7 @@ func (neo4j *Neo4j) CreateRelationship(relationship *Relationship) (bool, error)
 // response will be Object
 func (neo4j *Neo4j) UpdateRelationship(relationship *Relationship) (bool, error) {
 
-	if Relationship.Id == nil {
+	if relationship.Id == "" {
 		return false, errors.New("Invalid Relationship id")
 	}
 
@@ -95,7 +97,7 @@ func (neo4j *Neo4j) UpdateRelationship(relationship *Relationship) (bool, error)
 
 	url := neo4j.RelationshipUrl + "/" + relationship.Id + "/properties"
 
-	response, err := neo4j.doRequest("PUT", url, postData)
+	_, err = neo4j.doRequest("PUT", url, postData)
 	if err != nil {
 		return false, err
 	}
@@ -108,7 +110,7 @@ func (neo4j *Neo4j) DeleteRelationship(id string) (bool, error) {
 	url := neo4j.RelationshipUrl + "/" + id
 
 	//if Relationship not found Neo4j returns 404
-	response, err := neo4j.doRequest("DELETE", url, "")
+	_, err := neo4j.doRequest("DELETE", url, "")
 	if err != nil {
 		return false, err
 	}
@@ -127,7 +129,10 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 		return result, err
 	}
 
-	err = jsonDecode(response, &result)
+	err = json.Unmarshal([]byte(response), &result)
+	if err != nil {
+		return result, err
+	}
 
 	return result, err
 }
@@ -153,17 +158,17 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 
 // }
 
-func (relationship *Relationship) encodeData() string {
+func (relationship *Relationship) encodeData() (string, error) {
 	result, err := jsonEncode(relationship.Data)
 	return result, err
 }
 
 func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error) {
 
-	payload := RelationshipResponse{}
+	payload := &RelationshipResponse{}
 
-	err := jsonDecode(data, &payload)
-	// err := json.Unmarshal([]byte(data), payload)
+	// err := jsonDecode(data, &payload)
+	err := json.Unmarshal([]byte(data), payload)
 	if err != nil {
 		return false, err
 	}
@@ -187,7 +192,7 @@ func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error
 // 	}
 
 // 	for k, v := range payload {
-// 		err := mapRelationship(neo4j, relationship, payload)
+// 		err := mapRelationship(neo4j, relationship, &payload)
 // 		if err != nil {
 // 			return false, err
 // 		}
@@ -196,7 +201,7 @@ func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error
 // 	return true, nil
 // }
 
-func mapRelationship(neo4j *Noe4j, relationship *Relationship, payload RelationshipResponse) error {
+func mapRelationship(neo4j *Neo4j, relationship *Relationship, payload *RelationshipResponse) error {
 
 	relationshipId, err := getIdFromUrl(neo4j.RelationshipUrl, payload.Self)
 	if err != nil {
@@ -213,7 +218,7 @@ func mapRelationship(neo4j *Noe4j, relationship *Relationship, payload Relations
 		return err
 	}
 
-	relationship.Id = id
+	relationship.Id = relationshipId
 	relationship.StartNodeId = startNodeId
 	relationship.EndNodeId = endNodeId
 	relationship.Type = payload.Type
