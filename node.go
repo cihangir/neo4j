@@ -31,6 +31,9 @@ type NodeResponse struct {
 // response will be object
 func (neo4j *Neo4j) GetNode(id string) (*Node, error) {
 
+	if id == "" {
+		return nil, errors.New("Id not valid")
+	}
 	url := neo4j.NodeUrl + "/" + id
 
 	//if node not found Neo4j returns 404
