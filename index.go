@@ -2,6 +2,7 @@ package neo4j
 
 import (
 	"errors"
+	"fmt"
 )
 
 type Index struct {
@@ -18,8 +19,7 @@ func (neo4j *Neo4j) CreateIndex(index *Index) (bool, error) {
 	postData := ""
 
 	if len(index.Config) > 0 {
-		var err error
-		config, err = jsonEncode(index.Config)
+		config, err := jsonEncode(index.Config)
 		if err != nil {
 			return false, err
 		}
@@ -41,7 +41,7 @@ func (neo4j *Neo4j) DeleteIndex(name string) (bool, error) {
 	url := neo4j.IndexNodeUrl + "/" + name
 
 	//if node not found Neo4j returns 404
-	response, err := neo4j.doRequest("DELETE", url, "")
+	_, err := neo4j.doRequest("DELETE", url, "")
 	if err != nil {
 		return false, err
 	}
