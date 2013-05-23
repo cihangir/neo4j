@@ -84,52 +84,39 @@ func TestGetNodeReturnsNodeObject(t *testing.T) {
 	}
 }
 
-	if node.Payload.IncomingRelationships != "" {
-		t.Error("IncomingRelationships on valid node is not nil")
-	}
+func TestGetNodeReturnsErrorObjectOnError(t *testing.T) {
+	neo4jConnection := Connect("", 0)
 
-	if node.Payload.IncomingTypedRelationships != "" {
-		t.Error("IncomingTypedRelationships on valid node is not nil")
-	}
+	_, err := neo4jConnection.GetNode("asdfasdfas")
 
-	if node.Payload.CreateRelationship != "" {
-		t.Error("CreateRelationship on valid node is not nil")
+	tt := reflect.TypeOf(err).String()
+	// find a better way to check this
+	if tt != "*errors.errorString" {
+		t.Error("Error is not valid!")
 	}
-
 }
 
-func TestGetNodeWithInvalidId(t *testing.T) {
+func TestGetNodeWithIntMaxId(t *testing.T) {
+	maxInt := strconv.Itoa(int(^uint(0) >> 1))
 	neo4jConnection := Connect("", 0)
-	node, err := neo4jConnection.GetNode("asdfasdfas")
 
-	if node != nil {
-		t.Error("Node is not nil")
-	}
-
+	node, err := neo4jConnection.GetNode(maxInt)
 	if err == nil {
 		t.Error("Error is nil")
 	}
 
+	if node != nil {
+		t.Error("Node is not nil")
+	}
 }
 
-func TestGetNodeWithIdZero(t *testing.T) {
-	neo4jConnection := Connect("", 0)
-	node, err := neo4jConnection.GetNode("0")
-
-	if node == nil {
-		t.Error("Node is nil on valid test")
-	}
-
+func checkForSetValues(t *testing.T, node *Node, err error) {
 	if err != nil {
 		t.Error("Error is not nil on valid test")
 	}
 
-	if node.Id != "0" {
-		t.Error("Assigning node id doesnt work")
-	}
-
-	if len(node.Data) > 0 {
-		t.Error("node data is not nil")
+	if node == nil {
+		t.Error("Node is nil on valid test")
 	}
 
 	if node.Payload.PagedTraverse == "" {
