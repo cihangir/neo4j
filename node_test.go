@@ -43,15 +43,18 @@ func TestGetNodeWithEmptyId(t *testing.T) {
 	}
 }
 
-func checkForNil(t *testing.T, node *Node) {
+func TestGetNodeWithInvalidId(t *testing.T) {
+	neo4jConnection := Connect("", 0)
 
-	if node.Id != "" {
-		t.Error("Id is set")
+	node, err := neo4jConnection.GetNode("asdfasdfas")
+	if err == nil {
+		t.Error("Error is nil")
 	}
 
-	if node.Data != nil {
-		t.Error("node data is not nil")
+	if node != nil {
+		t.Error("Node is not nil")
 	}
+}
 
 	if node.Payload.PagedTraverse != "" {
 		t.Error("PagedTraverse on valid node is not nil")
