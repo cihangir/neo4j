@@ -1,6 +1,7 @@
 package neo4j
 
 import (
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -278,7 +279,14 @@ func testCreatedNodeDeafultvalues(t *testing.T, node *Node, res bool, err error)
 	}
 }
 
+func TestUpdateNodeWithEmptyId(t *testing.T) {
+
+	node := &Node{}
+	neo4jConnection := Connect("", 0)
+	_, err := neo4jConnection.UpdateNode(node)
 	if err == nil {
 		t.Error("Error is nil")
 	}
+	//if err.
+	// check error string
 }
