@@ -27,19 +27,18 @@ func TestDefaultConnection(t *testing.T) {
 	if neo4jConnection.IndexNodeUrl == "" {
 		t.Error("IndexNodeUrl is not set")
 	}
-
 }
 
 func TestGetNodeWithEmptyId(t *testing.T) {
 	neo4jConnection := Connect("", 0)
+
 	node, err := neo4jConnection.GetNode("")
+	if err == nil {
+		t.Error("Error is nil")
+	}
 
 	if node != nil {
 		t.Error("Node is not nil")
-	}
-
-	if err == nil {
-		t.Error("Error is nil")
 	}
 }
 
