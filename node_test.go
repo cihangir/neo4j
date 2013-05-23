@@ -164,7 +164,64 @@ func checkForSetValues(t *testing.T, node *Node, err error) {
 	if node.Payload.CreateRelationship == "" {
 		t.Error("CreateRelationship on valid node is nil")
 	}
+}
 
+func checkForNil(t *testing.T, node *Node) {
+
+	if node.Id != "" {
+		t.Error("Id is set")
+	}
+
+	if node.Data != nil {
+		t.Error("node data is not nil")
+	}
+
+	if node.Payload.PagedTraverse != "" {
+		t.Error("PagedTraverse on valid node is not nil")
+	}
+	if node.Payload.OutgoingRelationships != "" {
+		t.Error("OutgoingRelationships on valid node is not nil")
+	}
+
+	if node.Payload.Traverse != "" {
+		t.Error("Traverse on valid node is not nil")
+	}
+
+	if node.Payload.AllTypedRelationships != "" {
+		t.Error("AllTypedRelationships on valid node is not nil")
+	}
+
+	if node.Payload.Property != "" {
+		t.Error("Property on valid node is not nil")
+	}
+
+	if node.Payload.AllRelationships != "" {
+		t.Error("AllRelationships on valid node is not nil")
+	}
+
+	if node.Payload.Self != "" {
+		t.Error("Self on valid node is not nil")
+	}
+
+	if node.Payload.Properties != "" {
+		t.Error("Properties on valid node is not nil")
+	}
+
+	if node.Payload.OutgoingTypedRelationships != "" {
+		t.Error("OutgoingTypedRelationships on valid node is not nil")
+	}
+
+	if node.Payload.IncomingRelationships != "" {
+		t.Error("IncomingRelationships on valid node is not nil")
+	}
+
+	if node.Payload.IncomingTypedRelationships != "" {
+		t.Error("IncomingTypedRelationships on valid node is not nil")
+	}
+
+	if node.Payload.CreateRelationship != "" {
+		t.Error("CreateRelationship on valid node is not nil")
+	}
 }
 
 func TestGetNodeWithIntMaxId(t *testing.T) {
