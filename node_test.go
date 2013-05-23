@@ -224,14 +224,59 @@ func checkForNil(t *testing.T, node *Node) {
 	}
 }
 
-func TestGetNodeWithIntMaxId(t *testing.T) {
-	maxInt := strconv.Itoa(int(^uint(0) >> 1))
-	neo4jConnection := Connect("", 0)
-	node, err := neo4jConnection.GetNode(maxInt)
+func TestCreateNodeWithPassingInvalidObject(t *testing.T) {
+	t.Log("complete this method")
+}
 
-	if node != nil {
-		t.Error("Node is not nil")
+func TestCreateNodeWithPassingValidObjectAndData(t *testing.T) {
+
+	node := &Node{}
+	data := make(map[string]interface{})
+	data["stringData"] = "firstData"
+	data["integerData"] = 3
+	data["floatData"] = 3.0
+	node.Data = data
+
+	neo4jConnection := Connect("", 0)
+	res, err := neo4jConnection.CreateNode(node)
+	testCreatedNodeDeafultvalues(t, node, res, err)
+	t.Log("test integer values, all numbers are in float64 format")
+
+	if node.Data["stringData"] != "firstData" {
+		t.Error("string value has changed")
 	}
+
+	checkForSetValues(t, node, err)
+
+}
+
+func TestCreateNodeWithPassingValidObjectAndEmptyData(t *testing.T) {
+
+	node := &Node{}
+	neo4jConnection := Connect("", 0)
+	res, err := neo4jConnection.CreateNode(node)
+	testCreatedNodeDeafultvalues(t, node, res, err)
+
+	if len(node.Data) != 0 {
+		t.Error("node data len must be 0")
+	}
+
+	checkForSetValues(t, node, err)
+}
+
+func testCreatedNodeDeafultvalues(t *testing.T, node *Node, res bool, err error) {
+	if !res {
+		t.Error("node creation failed")
+	}
+
+	if err != nil {
+		t.Error("node creation returned err")
+	}
+
+	if node.Id == "" {
+		t.Error("Assigning node id doesnt work")
+	}
+}
 
 	if err == nil {
 		t.Error("Error is nil")
