@@ -1,9 +1,15 @@
 package neo4j
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 )
+
+type Batcher interface {
+	getBatchQuery(operation string) (map[string]interface{}, error)
+}
 
 type Batch struct {
 	Neo4j *Neo4j
@@ -12,7 +18,44 @@ type Batch struct {
 
 type BatchRequest struct {
 	Operation string
-	Data      interface{}
+	Data      Batcher
+}
+
+type BatchResponse struct {
+	Id       int                    `json:"id"`
+	Location string                 `json:"location"`
+	Body     map[string]interface{} `json:"body"`
+	From     string                 `json:"from"`
+}
+
+type ManuelBatchRequest struct {
+	To   string
+	Body map[string]interface{}
+}
+
+func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	query["to"] = mbr.To
+	query["body"] = mbr.Body
+
+	switch operation {
+	case BATCH_GET:
+		query["method"] = "GET"
+	case BATCH_UPDATE:
+		query["method"] = "PUT"
+	case BATCH_CREATE:
+		query["method"] = "POST"
+	case BATCH_DELETE:
+		query["method"] = "DELETE"
+	}
+
+	return query, nil
+}
+
+func (batch *Batch) GetLastIndex() string {
+	return strconv.Itoa(len(batch.Stack) - 1)
 }
 
 var (
@@ -32,27 +75,27 @@ func (neo4j *Neo4j) NewBatch() *Batch {
 	return batch
 }
 
-func (batch *Batch) Get(obj interface{}) *Batch {
+func (batch *Batch) Get(obj Batcher) *Batch {
 	batch.addToStack(BATCH_GET, obj)
 	return batch
 }
 
-func (batch *Batch) Create(obj interface{}) *Batch {
+func (batch *Batch) Create(obj Batcher) *Batch {
 	batch.addToStack(BATCH_CREATE, obj)
 	return batch
 }
 
-func (batch *Batch) Delete(obj interface{}) *Batch {
+func (batch *Batch) Delete(obj Batcher) *Batch {
 	batch.addToStack(BATCH_DELETE, obj)
 	return batch
 }
 
-func (batch *Batch) Update(obj interface{}) *Batch {
+func (batch *Batch) Update(obj Batcher) *Batch {
 	batch.addToStack(BATCH_UPDATE, obj)
 	return batch
 }
 
-func (batch *Batch) addToStack(operation string, obj interface{}) {
+func (batch *Batch) addToStack(operation string, obj Batcher) {
 
 	stack := batch.Stack
 	length := len(stack)
@@ -72,7 +115,7 @@ func (batch *Batch) addToStack(operation string, obj interface{}) {
 
 }
 
-func (batch *Batch) Execute() ([]interface{}, error) {
+func (batch *Batch) Execute() (interface{}, error) {
 	if batch.Neo4j == nil {
 		return nil, errors.New("Batch request is not created by NewBatch method!")
 	}
@@ -80,16 +123,37 @@ func (batch *Batch) Execute() ([]interface{}, error) {
 	stackLength := len(batch.Stack)
 
 	//create result array
-	result := make([]interface{}, stackLength)
+	response := make([]*BatchResponse, stackLength)
 
 	if stackLength == 0 {
-		return result, nil
+		return response, nil
 	}
 
+	request := make([]map[string]interface{}, stackLength)
 	for i, value := range batch.Stack {
-		fmt.Println(value.Operation)
-		result[i] = value.Data
+		// interface has this method getBatchQuery()
+		query, err := value.Data.getBatchQuery(value.Operation)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		query["id"] = i
+		request[i] = query
 	}
 
-	return result, nil
+	encodedRequest, err := jsonEncode(request)
+
+	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
+	if err != nil {
+		fmt.Println(res, err)
+		return response, err
+	}
+
+	err = json.Unmarshal([]byte(res), &response)
+	if err != nil {
+		fmt.Println(res, err)
+		return response, err
+	}
+
+	return response, nil
 }
