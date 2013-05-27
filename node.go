@@ -27,6 +27,22 @@ type NodeResponse struct {
 	Data                       map[string]interface{} `json:"data"`
 }
 
+func (node *Node) mapBatchResponse(data map[string]interface{}) (bool, error) {
+	encodedData, err := jsonEncode(data)
+
+	payload, err := node.decodeResponse(encodedData)
+	if err != nil {
+		return false, err
+	}
+
+	node.Id = payload.Self
+	node.Data = payload.Data
+	node.Payload = payload
+
+	return true, nil
+
+}
+
 // gets node from neo4j with given unique node id
 // response will be object
 func (neo4j *Neo4j) GetNode(id string) (*Node, error) {
