@@ -9,6 +9,7 @@ type Neo4j struct {
 	Client          *http.Client
 	BaseUrl         string
 	NodeUrl         string
+	BatchUrl        string
 	RelationshipUrl string
 	IndexNodeUrl    string
 }
@@ -29,6 +30,7 @@ func Connect(host string, port int) *Neo4j {
 		Client:          http.DefaultClient,
 		BaseUrl:         baseUrl,
 		NodeUrl:         baseUrl + "/node",
+		BatchUrl:        baseUrl + "/batch",
 		IndexNodeUrl:    baseUrl + "/index/node",
 		RelationshipUrl: baseUrl + "/relationship",
 	}
