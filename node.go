@@ -123,6 +123,81 @@ func (neo4j *Neo4j) DeleteNode(id string) (bool, error) {
 	return true, nil
 }
 
+func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	switch operation {
+	case BATCH_GET:
+		query, err := prepareNodeGetBatchMap(node)
+		return query, err
+	case BATCH_UPDATE:
+		query, err := prepareNodeUpdateBatchMap(node)
+		return query, err
+	case BATCH_CREATE:
+		query, err := prepareNodeCreateBatchMap(node)
+		return query, err
+	case BATCH_DELETE:
+		query, err := prepareNodeDeleteBatchMap(node)
+		return query, err
+	}
+	return query, nil
+}
+
+func prepareNodeGetBatchMap(node *Node) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if node.Id == "" {
+		return query, errors.New("Id not valid")
+	}
+
+	query["method"] = "GET"
+	query["to"] = "/node/" + node.Id
+
+	return query, nil
+}
+
+func prepareNodeDeleteBatchMap(node *Node) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if node.Id == "" {
+		return query, errors.New("Id not valid")
+	}
+
+	query["method"] = "DELETE"
+	query["to"] = "/node/" + node.Id
+
+	return query, nil
+}
+
+func prepareNodeCreateBatchMap(node *Node) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	query["method"] = "POST"
+	query["to"] = "/node"
+	query["body"] = node.Data
+
+	return query, nil
+}
+
+func prepareNodeUpdateBatchMap(node *Node) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if node.Id == "" {
+		return query, errors.New("Id not valid")
+	}
+
+	query["method"] = "PUT"
+	query["to"] = "/node/" + node.Id + "/properties"
+	query["body"] = node.Data
+
+	return query, nil
+}
+
 func (node *Node) encodeData() (string, error) {
 	result, err := jsonEncode(node.Data)
 	return result, err
