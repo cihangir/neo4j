@@ -90,3 +90,37 @@ func (neo4j *Neo4j) doRequest(requestType, url, data string) (string, error) {
 	return string(body), nil
 
 }
+
+// to-do combine this method with doRequest function
+func (neo4j *Neo4j) doBatchRequest(requestType, url, data string) (string, error) {
+
+	//convert string into bytestream
+	dataByte := strings.NewReader(data)
+	req, err := http.NewRequest(requestType, url, dataByte)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := neo4j.Client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return "", fmt.Errorf(res.Status)
+	}
+
+	// read response body
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		//A successful call returns err == nil
+		return "", err
+	}
+
+	return string(body), nil
+
+}
