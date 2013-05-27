@@ -25,6 +25,27 @@ type RelationshipResponse struct {
 	Data       map[string]interface{} `json:"data"`
 }
 
+func (relationship *Relationship) mapBatchResponse(data map[string]interface{}) (bool, error) {
+	encodedData, err := jsonEncode(data)
+
+	payload := &RelationshipResponse{}
+
+	err = json.Unmarshal([]byte(encodedData), payload)
+	if err != nil {
+		return false, err
+	}
+
+	relationship.Id = payload.Self
+	relationship.StartNodeId = payload.Start
+	relationship.EndNodeId = payload.End
+	relationship.Type = payload.Type
+	relationship.Data = payload.Data
+	relationship.Payload = payload
+
+	return true, nil
+
+}
+
 // gets Relationship from neo4j with given unique Relationship id
 // response will be object
 func (neo4j *Neo4j) GetRelationship(id string) (*Relationship, error) {
@@ -135,6 +156,100 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 	}
 
 	return result, err
+}
+
+func (relationship *Relationship) getBatchQuery(operation string) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	switch operation {
+	case BATCH_GET:
+		query, err := prepareRelationshipGetBatchMap(relationship)
+		return query, err
+	case BATCH_UPDATE:
+		query, err := prepareRelationshipUpdateBatchMap(relationship)
+		return query, err
+	case BATCH_CREATE:
+		query, err := prepareRelationshipCreateBatchMap(relationship)
+		return query, err
+	case BATCH_DELETE:
+		query, err := prepareRelationshipDeleteBatchMap(relationship)
+		return query, err
+	}
+	return query, nil
+}
+
+func prepareRelationshipGetBatchMap(relationship *Relationship) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if relationship.Id == "" {
+		return query, errors.New("Id not valid")
+	}
+
+	query["method"] = "GET"
+	query["to"] = "/relationship/" + relationship.Id
+
+	return query, nil
+}
+
+func prepareRelationshipDeleteBatchMap(relationship *Relationship) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if relationship.Id == "" {
+		return query, errors.New("Id not valid")
+	}
+
+	query["method"] = "DELETE"
+	query["to"] = "/relationship/" + relationship.Id
+
+	return query, nil
+}
+
+func prepareRelationshipCreateBatchMap(relationship *Relationship) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if relationship.StartNodeId == "" {
+		return query, errors.New("Start Node Id not valid")
+	}
+
+	if relationship.EndNodeId == "" {
+		return query, errors.New("End Node Id not valid")
+	}
+
+	if relationship.Type == "" {
+		return query, errors.New("Relationship type is not valid")
+	}
+
+	url := "/node/" + relationship.StartNodeId + "/relationships"
+
+	endNodeUrl := "/node/" + relationship.EndNodeId
+
+	query["method"] = "POST"
+	query["to"] = url
+
+	body := make(map[string]interface{})
+	body["to"] = endNodeUrl
+	body["type"] = relationship.Type
+	body["data"] = relationship.Data
+	query["body"] = body
+	return query, nil
+}
+
+func prepareRelationshipUpdateBatchMap(relationship *Relationship) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if relationship.Id == "" {
+		return query, errors.New("Id not valid")
+	}
+
+	query["method"] = "PUT"
+	query["to"] = "/node/" + relationship.Id + "/properties"
+	query["body"] = relationship.Data
+	return query, nil
 }
 
 // func (neo4j *Neo4j) GetAllRelationships(id string) (*[]Relationship, error) {
