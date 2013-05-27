@@ -61,7 +61,10 @@ func TestGetNodeWithIdZero(t *testing.T) {
 
 	node, err := neo4jConnection.GetNode("0")
 
-	if len(node.Data) > 0 {
+	if node == nil {
+		return
+	}
+	if node.Data != nil {
 		t.Error("node data is not nil")
 	}
 
