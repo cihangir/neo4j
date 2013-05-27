@@ -9,6 +9,7 @@ import (
 
 type Batcher interface {
 	getBatchQuery(operation string) (map[string]interface{}, error)
+	mapBatchResponse(data map[string]interface{}) (bool, error)
 }
 
 type Batch struct {
@@ -115,7 +116,7 @@ func (batch *Batch) addToStack(operation string, obj Batcher) {
 
 }
 
-func (batch *Batch) Execute() (interface{}, error) {
+func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	if batch.Neo4j == nil {
 		return nil, errors.New("Batch request is not created by NewBatch method!")
 	}
@@ -153,6 +154,11 @@ func (batch *Batch) Execute() (interface{}, error) {
 	if err != nil {
 		fmt.Println(res, err)
 		return response, err
+	}
+
+	for _, val := range response {
+		id := val.Id
+		batch.Stack[id].Data.mapBatchResponse(val.Body)
 	}
 
 	return response, nil
