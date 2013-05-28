@@ -7,21 +7,33 @@ import (
 	"strconv"
 )
 
+// Batcher is the interface for structs for making them compatible with Batch.
 type Batcher interface {
 	getBatchQuery(operation string) (map[string]interface{}, error)
 	mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error)
 }
 
+// Basic operation names
+var (
+	BATCH_GET    = "get"
+	BATCH_CREATE = "create"
+	BATCH_DELETE = "delete"
+	BATCH_UPDATE = "update"
+)
+
+// Base struct to support request
 type Batch struct {
 	Neo4j *Neo4j
 	Stack []*BatchRequest
 }
 
+// All batch request structs will be encapslated in this struct
 type BatchRequest struct {
 	Operation string
 	Data      Batcher
 }
 
+// All returning results from Neo4j will be in BatchResponse format
 type BatchResponse struct {
 	Id       int                    `json:"id"`
 	Location string                 `json:"location"`
@@ -29,11 +41,14 @@ type BatchResponse struct {
 	From     string                 `json:"from"`
 }
 
+//  ManuelBatchRequest is here to support referance passing requests in a transaction
+// For more information please check : http://docs.neo4j.org/chunked/stable/rest-api-batch-ops.html
 type ManuelBatchRequest struct {
 	To   string
 	Body map[string]interface{}
 }
 
+// Implement Batcher interface
 func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]interface{}, error) {
 
 	query := make(map[string]interface{})
@@ -55,19 +70,14 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 	return query, nil
 }
 
+// Returns last index of current stack
 func (batch *Batch) GetLastIndex() string {
+
 	return strconv.Itoa(len(batch.Stack) - 1)
 }
 
-var (
-	BATCH_GET    = "get"
-	BATCH_CREATE = "create"
-	BATCH_DELETE = "delete"
-	BATCH_UPDATE = "update"
-)
-
+// Creates New Batch request handler
 func (neo4j *Neo4j) NewBatch() *Batch {
-
 	stack := make([]*BatchRequest, 0, 2)
 	batch := &Batch{}
 	batch.Neo4j = neo4j
@@ -76,26 +86,35 @@ func (neo4j *Neo4j) NewBatch() *Batch {
 	return batch
 }
 
+// Get request to Neo4j as batch
 func (batch *Batch) Get(obj Batcher) *Batch {
 	batch.addToStack(BATCH_GET, obj)
+
 	return batch
 }
 
+// Create request to Neo4j as batch
 func (batch *Batch) Create(obj Batcher) *Batch {
 	batch.addToStack(BATCH_CREATE, obj)
+
 	return batch
 }
 
+// Delete request to Neo4j as batch
 func (batch *Batch) Delete(obj Batcher) *Batch {
 	batch.addToStack(BATCH_DELETE, obj)
+
 	return batch
 }
 
+// Update request to Neo4j as batch
 func (batch *Batch) Update(obj Batcher) *Batch {
 	batch.addToStack(BATCH_UPDATE, obj)
+
 	return batch
 }
 
+// Adds requests to stack
 func (batch *Batch) addToStack(operation string, obj Batcher) {
 
 	stack := batch.Stack
@@ -116,7 +135,9 @@ func (batch *Batch) addToStack(operation string, obj Batcher) {
 
 }
 
+// Prepares and sends the request to Neo4j, then pars
 func (batch *Batch) Execute() ([]*BatchResponse, error) {
+
 	if batch.Neo4j == nil {
 		return nil, errors.New("Batch request is not created by NewBatch method!")
 	}
@@ -130,17 +151,8 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 		return response, nil
 	}
 
-	request := make([]map[string]interface{}, stackLength)
-	for i, value := range batch.Stack {
-		// interface has this method getBatchQuery()
-		query, err := value.Data.getBatchQuery(value.Operation)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		query["id"] = i
-		request[i] = query
-	}
+	// prepare request
+	request := prepareRequest(batch.Stack)
 
 	encodedRequest, err := jsonEncode(request)
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
@@ -153,12 +165,31 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 		return response, err
 	}
 
-	//do mapping here for later usage
+	// do mapping here for later usage
 	batch.mapResponse(response)
+
+	// do a clean
 	batch.Stack = make([]*BatchRequest, 0)
+
 	return response, nil
 }
 
+// prepares batch request as slice of map
+func prepareRequest(stack []*BatchRequest) []map[string]interface{} {
+	request := make([]map[string]interface{}, len(stack))
+	for i, value := range stack {
+		// interface has this method getBatchQuery()
+		query, err := value.Data.getBatchQuery(value.Operation)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		query["id"] = i
+		request[i] = query
+	}
+}
+
+// map incoming response, it will update request's nodes and relationships
 func (batch *Batch) mapResponse(response []*BatchResponse) {
 
 	for _, val := range response {
