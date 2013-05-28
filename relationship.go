@@ -25,7 +25,7 @@ type RelationshipResponse struct {
 	Data       map[string]interface{} `json:"data"`
 }
 
-func (relationship *Relationship) mapBatchResponse(data map[string]interface{}) (bool, error) {
+func (relationship *Relationship) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
 	encodedData, err := jsonEncode(data)
 
 	payload := &RelationshipResponse{}
@@ -35,7 +35,11 @@ func (relationship *Relationship) mapBatchResponse(data map[string]interface{}) 
 		return false, err
 	}
 
-	relationship.Id = payload.Self
+	id, err := getIdFromUrl(neo4j.RelationshipUrl, payload.Self)
+	if err != nil {
+		return false, nil
+	}
+	relationship.Id = id
 	relationship.StartNodeId = payload.Start
 	relationship.EndNodeId = payload.End
 	relationship.Type = payload.Type
