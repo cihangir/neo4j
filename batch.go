@@ -9,7 +9,7 @@ import (
 
 type Batcher interface {
 	getBatchQuery(operation string) (map[string]interface{}, error)
-	mapBatchResponse(data map[string]interface{}) (bool, error)
+	mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error)
 }
 
 type Batch struct {
@@ -143,23 +143,26 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	}
 
 	encodedRequest, err := jsonEncode(request)
-
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
 	if err != nil {
-		fmt.Println(res, err)
 		return response, err
 	}
 
 	err = json.Unmarshal([]byte(res), &response)
 	if err != nil {
-		fmt.Println(res, err)
 		return response, err
 	}
 
+	//do mapping here for later usage
+	batch.mapResponse(response)
+	batch.Stack = make([]*BatchRequest, 0)
+	return response, nil
+}
+
+func (batch *Batch) mapResponse(response []*BatchResponse) {
+
 	for _, val := range response {
 		id := val.Id
-		batch.Stack[id].Data.mapBatchResponse(val.Body)
+		batch.Stack[id].Data.mapBatchResponse(batch.Neo4j, val.Body)
 	}
-
-	return response, nil
 }
