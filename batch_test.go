@@ -274,3 +274,50 @@ func TestBatchWithRelationshipForAllRequests(t *testing.T) {
 		t.Error("trying to get non-existent relationship succeeded")
 	}
 }
+
+func createNewNode() *Node {
+	//create node
+	node := &Node{}
+	data := make(map[string]interface{})
+	data["hede"] = "debe"
+	node.Data = data
+	return node
+}
+
+func TestBatchWithManualBatchQuery(t *testing.T) {
+	neo4jConnection := Connect("", 0)
+	batch := neo4jConnection.NewBatch()
+
+	node := createNewNode()
+	node2 := createNewNode()
+
+	batch.Create(node)
+	batch.Create(node2)
+
+	manuelBatchRequest := &ManuelBatchRequest{}
+
+	body := make(map[string]interface{})
+	body["type"] = "relationshipType"
+	body["to"] = "{0}"
+	data := make(map[string]interface{})
+	data["data"] = "relationship.Data"
+	body["data"] = data
+
+	// manuelBatchRequest.To = "{" + batch.GetLastIndex() + "}/relationship"
+	manuelBatchRequest.To = "{1}/relationships"
+	manuelBatchRequest.Body = body
+	batch.Create(manuelBatchRequest)
+	res, err := batch.Execute()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(res) != 3 {
+		t.Error(len(res), "Response length is not valid")
+	}
+
+	if len(manuelBatchRequest.Response) < 1 {
+		t.Error("Response is not set")
+	}
+
+}
