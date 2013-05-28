@@ -187,6 +187,8 @@ func prepareRequest(stack []*BatchRequest) []map[string]interface{} {
 		query["id"] = i
 		request[i] = query
 	}
+
+	return request
 }
 
 // map incoming response, it will update request's nodes and relationships
