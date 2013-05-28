@@ -2,7 +2,6 @@ package neo4j
 
 import (
 	"net/http"
-	"strconv"
 )
 
 type Neo4j struct {
@@ -14,16 +13,10 @@ type Neo4j struct {
 	IndexNodeUrl    string
 }
 
-func Connect(host string, port int) *Neo4j {
-	if host == "" {
-		host = "http://127.0.0.1"
+func Connect(url string) *Neo4j {
+	if url == "" {
+		url = "http://127.0.0.1:7474"
 	}
-
-	if port == 0 {
-		port = 7474
-	}
-
-	url := host + ":" + strconv.Itoa(port)
 
 	baseUrl := url + "/db/data"
 	return &Neo4j{

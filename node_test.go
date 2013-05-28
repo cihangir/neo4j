@@ -7,7 +7,7 @@ import (
 )
 
 func TestDefaultConnection(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	if neo4jConnection.Client == nil {
 		t.Error("Connection client is not set")
@@ -31,7 +31,7 @@ func TestDefaultConnection(t *testing.T) {
 }
 
 func TestGetNodeWithEmptyId(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	node, err := neo4jConnection.GetNode("")
 	if err == nil {
@@ -44,7 +44,7 @@ func TestGetNodeWithEmptyId(t *testing.T) {
 }
 
 func TestGetNodeWithInvalidId(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	node, err := neo4jConnection.GetNode("asdfasdfas")
 	if err == nil {
@@ -57,7 +57,7 @@ func TestGetNodeWithInvalidId(t *testing.T) {
 }
 
 func TestGetNodeWithIdZero(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	node, err := neo4jConnection.GetNode("0")
 
@@ -76,7 +76,7 @@ func TestGetNodeWithIdZero(t *testing.T) {
 }
 
 func TestGetNodeReturnsNodeObject(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	node, _ := neo4jConnection.GetNode("0")
 
@@ -88,7 +88,7 @@ func TestGetNodeReturnsNodeObject(t *testing.T) {
 }
 
 func TestGetNodeReturnsErrorObjectOnError(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	_, err := neo4jConnection.GetNode("asdfasdfas")
 
@@ -101,7 +101,7 @@ func TestGetNodeReturnsErrorObjectOnError(t *testing.T) {
 
 func TestGetNodeWithIntMaxId(t *testing.T) {
 	maxInt := strconv.Itoa(int(^uint(0) >> 1))
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	node, err := neo4jConnection.GetNode(maxInt)
 	if err == nil {
@@ -241,7 +241,7 @@ func TestCreateNodeWithPassingValidObjectAndData(t *testing.T) {
 	data["floatData"] = 3.0
 	node.Data = data
 
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 	res, err := neo4jConnection.CreateNode(node)
 	testCreatedNodeDeafultvalues(t, node, res, err)
 	t.Log("test integer values, all numbers are in float64 format")
@@ -257,7 +257,7 @@ func TestCreateNodeWithPassingValidObjectAndData(t *testing.T) {
 func TestCreateNodeWithPassingValidObjectAndEmptyData(t *testing.T) {
 
 	node := &Node{}
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 	res, err := neo4jConnection.CreateNode(node)
 	testCreatedNodeDeafultvalues(t, node, res, err)
 
@@ -285,7 +285,7 @@ func testCreatedNodeDeafultvalues(t *testing.T, node *Node, res bool, err error)
 func TestUpdateNodeWithEmptyId(t *testing.T) {
 
 	node := &Node{}
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 	_, err := neo4jConnection.UpdateNode(node)
 	if err == nil {
 		t.Error("Error is nil")

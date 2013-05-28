@@ -6,7 +6,7 @@ import (
 )
 
 func TestBatchCreation(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 	batch := neo4jConnection.NewBatch()
 	tt := reflect.TypeOf(batch).String()
 	if tt != "*neo4j.Batch" {
@@ -15,7 +15,7 @@ func TestBatchCreation(t *testing.T) {
 }
 
 func TestBatchWithOneNode(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 	batch := neo4jConnection.NewBatch()
 
 	node := &Node{}
@@ -48,7 +48,7 @@ func TestBatchWithOneNode(t *testing.T) {
 }
 
 func TestBatchWithOneRelationship(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	//create node
 	node := &Node{}
@@ -103,7 +103,7 @@ func TestBatchWithOneRelationship(t *testing.T) {
 }
 
 func TestBatchWithNodeForAllRequests(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	//create node
 	node := &Node{}
@@ -176,7 +176,7 @@ func TestBatchWithNodeForAllRequests(t *testing.T) {
 }
 
 func TestBatchWithRelationshipForAllRequests(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 
 	data := make(map[string]interface{})
 	data["hede"] = "debe"
@@ -285,7 +285,7 @@ func createNewNode() *Node {
 }
 
 func TestBatchWithManualBatchQuery(t *testing.T) {
-	neo4jConnection := Connect("", 0)
+	neo4jConnection := Connect("")
 	batch := neo4jConnection.NewBatch()
 
 	node := createNewNode()
