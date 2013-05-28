@@ -25,31 +25,6 @@ type RelationshipResponse struct {
 	Data       map[string]interface{} `json:"data"`
 }
 
-func (relationship *Relationship) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
-	encodedData, err := jsonEncode(data)
-
-	payload := &RelationshipResponse{}
-
-	err = json.Unmarshal([]byte(encodedData), payload)
-	if err != nil {
-		return false, err
-	}
-
-	id, err := getIdFromUrl(neo4j.RelationshipUrl, payload.Self)
-	if err != nil {
-		return false, nil
-	}
-	relationship.Id = id
-	relationship.StartNodeId = payload.Start
-	relationship.EndNodeId = payload.End
-	relationship.Type = payload.Type
-	relationship.Data = payload.Data
-	relationship.Payload = payload
-
-	return true, nil
-
-}
-
 // gets Relationship from neo4j with given unique Relationship id
 // response will be object
 func (neo4j *Neo4j) GetRelationship(id string) (*Relationship, error) {
@@ -71,8 +46,7 @@ func (neo4j *Neo4j) GetRelationship(id string) (*Relationship, error) {
 	return relationship, nil
 }
 
-// creates a unique Relationship with given id and Relationship name
-// response will be Object
+// creates a unique Relationship with struct
 func (neo4j *Neo4j) CreateRelationship(relationship *Relationship) (bool, error) {
 
 	if relationship.StartNodeId == "" {
@@ -83,9 +57,9 @@ func (neo4j *Neo4j) CreateRelationship(relationship *Relationship) (bool, error)
 		return false, errors.New("End Node Id not valid")
 	}
 
-	url := neo4j.NodeUrl + "/" + relationship.StartNodeId + "/relationships"
+	url := fmt.Sprintf("%s/%s/relationships", neo4j.NodeUrl, relationship.StartNodeId)
 
-	endNodeUrl := neo4j.NodeUrl + "/" + relationship.EndNodeId
+	endNodeUrl := fmt.Sprintf("%s/%s", neo4j.NodeUrl, relationship.EndNodeId)
 
 	relData, err := relationship.encodeData()
 	if err != nil {
@@ -93,7 +67,6 @@ func (neo4j *Neo4j) CreateRelationship(relationship *Relationship) (bool, error)
 	}
 
 	postData := fmt.Sprintf(`{"to" : "%s", "type" : "%s", "data" : %s }`, endNodeUrl, relationship.Type, relData)
-
 	response, err := neo4j.doRequest("POST", url, postData)
 	if err != nil {
 		return false, err
@@ -120,7 +93,7 @@ func (neo4j *Neo4j) UpdateRelationship(relationship *Relationship) (bool, error)
 		return false, err
 	}
 
-	url := neo4j.RelationshipUrl + "/" + relationship.Id + "/properties"
+	url := fmt.Sprintf("%s/%s/properties", neo4j.RelationshipUrl, relationship.Id)
 
 	_, err = neo4j.doRequest("PUT", url, postData)
 	if err != nil {
@@ -132,8 +105,7 @@ func (neo4j *Neo4j) UpdateRelationship(relationship *Relationship) (bool, error)
 
 func (neo4j *Neo4j) DeleteRelationship(id string) (bool, error) {
 
-	url := neo4j.RelationshipUrl + "/" + id
-
+	url := fmt.Sprintf("%s/%s", neo4j.RelationshipUrl, id)
 	//if Relationship not found Neo4j returns 404
 	_, err := neo4j.doRequest("DELETE", url, "")
 	if err != nil {
@@ -145,10 +117,8 @@ func (neo4j *Neo4j) DeleteRelationship(id string) (bool, error) {
 
 func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 
-	url := neo4j.RelationshipUrl + "/types"
-
+	url := fmt.Sprintf("%s/types", neo4j.RelationshipUrl)
 	result := make([]string, 0)
-
 	response, err := neo4j.doRequest("GET", url, "")
 	if err != nil {
 		return result, err
@@ -158,6 +128,14 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 	if err != nil {
 		return result, err
 	}
+
+	return result, err
+}
+
+func (relationship *Relationship) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
+	// because data is a map, convert back to Json
+	encodedData, err := jsonEncode(data)
+	result, err := relationship.decode(neo4j, data)
 
 	return result, err
 }
@@ -286,12 +264,13 @@ func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error
 
 	payload := &RelationshipResponse{}
 
-	// err := jsonDecode(data, &payload)
+	// Map json to our RelationshipResponse struct
 	err := json.Unmarshal([]byte(data), payload)
 	if err != nil {
 		return false, err
 	}
 
+	// Map returning result to our relationship struct
 	err = mapRelationship(neo4j, relationship, payload)
 	if err != nil {
 		return false, err
