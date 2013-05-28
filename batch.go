@@ -44,8 +44,9 @@ type BatchResponse struct {
 //  ManuelBatchRequest is here to support referance passing requests in a transaction
 // For more information please check : http://docs.neo4j.org/chunked/stable/rest-api-batch-ops.html
 type ManuelBatchRequest struct {
-	To   string
-	Body map[string]interface{}
+	To       string
+	Body     map[string]interface{}
+	Response map[string]interface{}
 }
 
 // Implement Batcher interface
@@ -68,6 +69,11 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 	}
 
 	return query, nil
+}
+
+func (mbr *ManuelBatchRequest) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
+	mbr.Response = data
+	return true, nil
 }
 
 // Returns last index of current stack
@@ -155,6 +161,7 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	request := prepareRequest(batch.Stack)
 
 	encodedRequest, err := jsonEncode(request)
+
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
 	if err != nil {
 		return response, err
