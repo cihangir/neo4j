@@ -157,6 +157,9 @@ func (relationship *Relationship) getBatchQuery(operation string) (map[string]in
 	case BATCH_DELETE:
 		query, err := prepareRelationshipDeleteBatchMap(relationship)
 		return query, err
+	case BATCH_CREATE_UNIQUE:
+		query, err := prepareRelationshipCreateUniqueBatchMap(relationship)
+		return query, err
 	}
 	return query, nil
 }
@@ -217,6 +220,38 @@ func prepareRelationshipCreateBatchMap(relationship *Relationship) (map[string]i
 	body["type"] = relationship.Type
 	body["data"] = relationship.Data
 	query["body"] = body
+	return query, nil
+}
+
+func prepareRelationshipCreateUniqueBatchMap(relationship *Relationship) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+
+	if relationship.StartNodeId == "" {
+		return query, errors.New("Start Node Id not valid")
+	}
+
+	if relationship.EndNodeId == "" {
+		return query, errors.New("End Node Id not valid")
+	}
+
+	if relationship.Type == "" {
+		return query, errors.New("Relationship type is not valid")
+	}
+
+	startUrl := "/node/" + relationship.StartNodeId
+
+	endNodeUrl := "/node/" + relationship.EndNodeId
+
+	query["method"] = "POST"
+	query["to"] = "/index/relationship"
+	query["body"] = map[string]interface{}{
+		"start":      startUrl,
+		"end":        endNodeUrl,
+		"type":       relationship.Type,
+		"properties": relationship.Data,
+	}
+
 	return query, nil
 }
 

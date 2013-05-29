@@ -159,6 +159,9 @@ func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error
 	case BATCH_DELETE:
 		query, err := prepareNodeDeleteBatchMap(node)
 		return query, err
+	case BATCH_CREATE_UNIQUE:
+		query, err := prepareNodeCreateUniqueBatchMap(node)
+		return query, err
 	}
 	return query, nil
 }
@@ -213,6 +216,18 @@ func prepareNodeUpdateBatchMap(node *Node) (map[string]interface{}, error) {
 	query["method"] = "PUT"
 	query["to"] = "/node/" + node.Id + "/properties"
 	query["body"] = node.Data
+
+	return query, nil
+}
+
+func prepareNodeCreateUniqueBatchMap(node *Node) (map[string]interface{}, error) {
+
+	query := make(map[string]interface{})
+	query["method"] = "POST"
+	query["to"] = "/index/node"
+	query["body"] = map[string]interface{}{
+		"properties": node.Data,
+	}
 
 	return query, nil
 }

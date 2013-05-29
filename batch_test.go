@@ -321,3 +321,24 @@ func TestBatchWithManualBatchQuery(t *testing.T) {
 	}
 
 }
+
+func TestBatchWithUnique(t *testing.T) {
+	neo4jConnection := Connect("")
+	batch := neo4jConnection.NewBatch()
+
+	unique := &Unique{}
+	unique.IndexName = "koding"
+	unique.Key = "id"
+	unique.Value = "indeximinadi2"
+
+	node := createNewNode()
+	batch.CreateUnique(node, unique)
+	res, err := batch.Execute()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(res) != 1 {
+		t.Error(len(res), "Response length is not valid")
+	}
+}

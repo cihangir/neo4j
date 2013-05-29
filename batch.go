@@ -15,10 +15,11 @@ type Batcher interface {
 
 // Basic operation names
 var (
-	BATCH_GET    = "get"
-	BATCH_CREATE = "create"
-	BATCH_DELETE = "delete"
-	BATCH_UPDATE = "update"
+	BATCH_GET           = "get"
+	BATCH_CREATE        = "create"
+	BATCH_DELETE        = "delete"
+	BATCH_UPDATE        = "update"
+	BATCH_CREATE_UNIQUE = "createUnique"
 )
 
 // Base struct to support request
@@ -62,7 +63,7 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 		query["method"] = "GET"
 	case BATCH_UPDATE:
 		query["method"] = "PUT"
-	case BATCH_CREATE:
+	case BATCH_CREATE, BATCH_CREATE_UNIQUE:
 		query["method"] = "POST"
 	case BATCH_DELETE:
 		query["method"] = "DELETE"
@@ -120,6 +121,19 @@ func (batch *Batch) Update(obj Batcher) *Batch {
 	return batch
 }
 
+// Update request to Neo4j as batch
+func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
+
+	//encapsulating the object
+	uniqueRequest := &UniqueRequest{}
+	uniqueRequest.Data = obj
+	uniqueRequest.Properties = properties
+
+	batch.addToStack(BATCH_CREATE_UNIQUE, uniqueRequest)
+
+	return batch
+}
+
 // Adds requests to stack
 func (batch *Batch) addToStack(operation string, obj Batcher) {
 
@@ -161,7 +175,7 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	request := prepareRequest(batch.Stack)
 
 	encodedRequest, err := jsonEncode(request)
-
+	// fmt.Println(encodedRequest)
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
 	if err != nil {
 		return response, err
