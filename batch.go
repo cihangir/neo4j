@@ -63,10 +63,15 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 		query["method"] = "GET"
 	case BATCH_UPDATE:
 		query["method"] = "PUT"
-	case BATCH_CREATE, BATCH_CREATE_UNIQUE:
+	case BATCH_CREATE:
 		query["method"] = "POST"
 	case BATCH_DELETE:
 		query["method"] = "DELETE"
+	case BATCH_CREATE_UNIQUE:
+		query["method"] = "POST"
+		query["body"] = map[string]interface{}{
+			"properties": mbr.Body,
+		}
 	}
 
 	return query, nil
