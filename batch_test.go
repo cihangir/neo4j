@@ -1,6 +1,7 @@
 package neo4j
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -288,9 +289,17 @@ func TestBatchWithManualBatchQuery(t *testing.T) {
 	neo4jConnection := Connect("")
 	batch := neo4jConnection.NewBatch()
 
+	nodeData := make(map[string]interface{})
+	nodeData["data"] = "node.Data"
+
+	manuelNode := &ManuelBatchRequest{}
+	manuelNode.To = "/node"
+	manuelNode.Body = nodeData
+
 	node := createNewNode()
 	node2 := createNewNode()
 
+	batch.Create(manuelNode)
 	batch.Create(node)
 	batch.Create(node2)
 
@@ -318,12 +327,28 @@ func TestBatchWithManualBatchQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(res) != 5 {
+	if len(res) != 6 {
 		t.Error(len(res), "Response length is not valid")
 	}
 
 	if manuelBatchRequest.Response == nil {
 		t.Error("Response is not set")
+	}
+
+	nodeRes := Node{}
+	neo4jConnection.getResponse(manuelNode, &nodeRes)
+	if nodeRes.Id == "" {
+		t.Error("node id is empty")
+	}
+
+	relationships := []Relationship{}
+	err = neo4jConnection.getResponse(customRel, &relationships)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if len(relationships) != 2 {
+		t.Error(len(relationships), customRel.Response, "relationship length is not valid")
 	}
 
 }
