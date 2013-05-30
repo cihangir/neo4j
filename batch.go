@@ -74,13 +74,13 @@ func (neo4j *Neo4j) getResponse(mbr *ManuelBatchRequest, result interface{}) err
 			return errors.New("Response is not an array")
 		}
 
-		hede := make([]Relationship, len(mbr.Response.([]interface{})))
+		tempResult := make([]Relationship, len(mbr.Response.([]interface{})))
 		result = result.(*[]Relationship)
 		arrayResult := mbr.Response.([]interface{})
 		for i, value := range arrayResult {
-			hede[i].mapBatchResponse(neo4j, value)
+			tempResult[i].mapBatchResponse(neo4j, value)
 		}
-		(*result.(*[]Relationship)) = hede
+		(*result.(*[]Relationship)) = tempResult
 	}
 
 	return nil
