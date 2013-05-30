@@ -3,7 +3,6 @@ package neo4j
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"reflect"
 	"strconv"
 )
@@ -214,18 +213,19 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	}
 
 	// prepare request
-	request := prepareRequest(batch.Stack)
-
+	request, err := prepareRequest(batch.Stack)
+	if err != nil {
+		return nil, err
+	}
 	encodedRequest, err := jsonEncode(request)
-
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
 	if err != nil {
-		return response, err
+		return nil, err
 	}
 
 	err = json.Unmarshal([]byte(res), &response)
 	if err != nil {
-		return response, err
+		return nil, err
 	}
 
 	// do mapping here for later usage
@@ -238,20 +238,19 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 }
 
 // prepares batch request as slice of map
-func prepareRequest(stack []*BatchRequest) []map[string]interface{} {
+func prepareRequest(stack []*BatchRequest) ([]map[string]interface{}, error) {
 	request := make([]map[string]interface{}, len(stack))
 	for i, value := range stack {
 		// interface has this method getBatchQuery()
 		query, err := value.Data.getBatchQuery(value.Operation)
 		if err != nil {
-			fmt.Println(err)
-			continue
+			return nil, err
 		}
 		query["id"] = i
 		request[i] = query
 	}
 
-	return request
+	return request, nil
 }
 
 // map incoming response, it will update request's nodes and relationships

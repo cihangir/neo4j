@@ -28,3 +28,31 @@ func Connect(url string) *Neo4j {
 		RelationshipUrl: baseUrl + "/relationship",
 	}
 }
+
+func (neo4j *Neo4j) Get(obj Batcher) error {
+
+	_, err := neo4j.NewBatch().Get(obj).Execute()
+
+	return err
+}
+
+func (neo4j *Neo4j) Create(obj Batcher) error {
+
+	_, err := neo4j.NewBatch().Create(obj).Execute()
+
+	return err
+}
+
+func (neo4j *Neo4j) Delete(obj Batcher) error {
+
+	_, err := neo4j.NewBatch().Delete(obj).Execute()
+
+	return err
+}
+
+func (neo4j *Neo4j) Update(obj Batcher) error {
+
+	_, err := neo4j.NewBatch().Update(obj).Execute()
+
+	return err
+}
