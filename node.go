@@ -27,7 +27,7 @@ type NodeResponse struct {
 	Data                       map[string]interface{} `json:"data"`
 }
 
-func (node *Node) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
+func (node *Node) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	encodedData, err := jsonEncode(data)
 
 	payload, err := node.decodeResponse(encodedData)

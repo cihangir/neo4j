@@ -132,7 +132,7 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 	return result, err
 }
 
-func (relationship *Relationship) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
+func (relationship *Relationship) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	// because data is a map, convert back to Json
 	encodedData, err := jsonEncode(data)
 	result, err := relationship.decode(neo4j, encodedData)

@@ -307,16 +307,22 @@ func TestBatchWithManualBatchQuery(t *testing.T) {
 	manuelBatchRequest.To = "{1}/relationships"
 	manuelBatchRequest.Body = body
 	batch.Create(manuelBatchRequest)
+	batch.Create(manuelBatchRequest)
+
+	customRel := &ManuelBatchRequest{}
+	customRel.To = "{1}/relationships/all"
+	batch.Get(customRel)
+
 	res, err := batch.Execute()
 	if err != nil {
 		t.Error(err)
 	}
 
-	if len(res) != 3 {
+	if len(res) != 5 {
 		t.Error(len(res), "Response length is not valid")
 	}
 
-	if len(manuelBatchRequest.Response) < 1 {
+	if manuelBatchRequest.Response == nil {
 		t.Error("Response is not set")
 	}
 

@@ -50,7 +50,7 @@ func (ur *UniqueRequest) getBatchQuery(operation string) (map[string]interface{}
 	return query, nil
 }
 
-func (ur *UniqueRequest) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
+func (ur *UniqueRequest) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	result, err := ur.Data.mapBatchResponse(neo4j, data)
 	return result, err
 }

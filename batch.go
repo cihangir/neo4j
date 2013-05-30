@@ -10,7 +10,7 @@ import (
 // Batcher is the interface for structs for making them compatible with Batch.
 type Batcher interface {
 	getBatchQuery(operation string) (map[string]interface{}, error)
-	mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error)
+	mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error)
 }
 
 // Basic operation names
@@ -36,10 +36,10 @@ type BatchRequest struct {
 
 // All returning results from Neo4j will be in BatchResponse format
 type BatchResponse struct {
-	Id       int                    `json:"id"`
-	Location string                 `json:"location"`
-	Body     map[string]interface{} `json:"body"`
-	From     string                 `json:"from"`
+	Id       int         `json:"id"`
+	Location string      `json:"location"`
+	Body     interface{} `json:"body"`
+	From     string      `json:"from"`
 }
 
 //  ManuelBatchRequest is here to support referance passing requests in a transaction
@@ -47,7 +47,7 @@ type BatchResponse struct {
 type ManuelBatchRequest struct {
 	To       string
 	Body     map[string]interface{}
-	Response map[string]interface{}
+	Response interface{}
 }
 
 // Implement Batcher interface
@@ -77,7 +77,7 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 	return query, nil
 }
 
-func (mbr *ManuelBatchRequest) mapBatchResponse(neo4j *Neo4j, data map[string]interface{}) (bool, error) {
+func (mbr *ManuelBatchRequest) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	mbr.Response = data
 	return true, nil
 }
@@ -180,7 +180,7 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	request := prepareRequest(batch.Stack)
 
 	encodedRequest, err := jsonEncode(request)
-	// fmt.Println(encodedRequest)
+
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
 	if err != nil {
 		return response, err
