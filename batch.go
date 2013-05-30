@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
@@ -48,6 +49,42 @@ type ManuelBatchRequest struct {
 	To       string
 	Body     map[string]interface{}
 	Response interface{}
+}
+
+// Implement Batcher interface
+func (neo4j *Neo4j) getResponse(mbr *ManuelBatchRequest, result interface{}) error {
+
+	//get type of current value
+	typeOfResult := reflect.TypeOf(result).String()
+	typeOfResponse := reflect.TypeOf(mbr.Response).String()
+	switch typeOfResult {
+	//if we have an complex type, resolve it
+	case "*neo4j.Node":
+		_, err := result.(*Node).mapBatchResponse(neo4j, mbr.Response)
+		if err != nil {
+			return err
+		}
+	case "*neo4j.Relationship":
+		_, err := result.(*Relationship).mapBatchResponse(neo4j, mbr.Response)
+		if err != nil {
+			return err
+		}
+	case "*[]neo4j.Relationship":
+		if typeOfResponse != "[]interface {}" {
+			return errors.New("Response is not an array")
+		}
+
+		hede := make([]Relationship, len(mbr.Response.([]interface{})))
+		result = result.(*[]Relationship)
+		arrayResult := mbr.Response.([]interface{})
+		for i, value := range arrayResult {
+			hede[i].mapBatchResponse(neo4j, value)
+		}
+		(*result.(*[]Relationship)) = hede
+	}
+
+	return nil
+
 }
 
 // Implement Batcher interface
