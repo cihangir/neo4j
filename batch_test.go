@@ -336,13 +336,17 @@ func TestBatchWithManualBatchQuery(t *testing.T) {
 	}
 
 	nodeRes := Node{}
-	neo4jConnection.getResponse(manuelNode, &nodeRes)
+	err = neo4jConnection.GetManualBatchResponse(manuelNode, &nodeRes)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if nodeRes.Id == "" {
 		t.Error("node id is empty")
 	}
 
 	relationships := []Relationship{}
-	err = neo4jConnection.getResponse(customRel, &relationships)
+	err = neo4jConnection.GetManualBatchResponse(customRel, &relationships)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -51,7 +51,7 @@ type ManuelBatchRequest struct {
 }
 
 // Implement Batcher interface
-func (neo4j *Neo4j) getResponse(mbr *ManuelBatchRequest, result interface{}) error {
+func (neo4j *Neo4j) GetManualBatchResponse(mbr *ManuelBatchRequest, result interface{}) error {
 
 	//get type of current value
 	typeOfResult := reflect.TypeOf(result).String()

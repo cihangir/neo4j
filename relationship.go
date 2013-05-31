@@ -179,26 +179,52 @@ func prepareRelationshipUpdateBatchMap(relationship *Relationship) (map[string]i
 	return query, nil
 }
 
-// func (neo4j *Neo4j) GetAllRelationships(id string) (*[]Relationship, error) {
+func (neo4j *Neo4j) GetOutgoingRelationships(node *Node) ([]Relationship, error) {
+	res, err := getRelationships(neo4j, node, "out")
+	return res, err
+}
 
-// 	url := neo4j.NodeUrl + "/" + id + "/relationships/all"
+func (neo4j *Neo4j) GetAllRelationships(node *Node) ([]Relationship, error) {
+	res, err := getRelationships(neo4j, node, "all")
+	return res, err
+}
 
-// 	//if node not found Neo4j returns 404
-// 	response, err := neo4j.doRequest("GET", url, "")
-// 	if err != nil {
-// 		return false, err
-// 	}
+func (neo4j *Neo4j) GetIncomingRelationships(node *Node) ([]Relationship, error) {
+	res, err := getRelationships(neo4j, node, "in")
+	return res, err
+}
 
-// 	relationships := &[]Relationship{}
+func (neo4j *Neo4j) GetOutgoingTypedRelationships(node *Node, relType string) ([]Relationship, error) {
+	res, err := getRelationships(neo4j, node, fmt.Sprintf("out/%s", relType))
+	return res, err
+}
 
-// 	result, err := relationships.decodeArray(response)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (neo4j *Neo4j) GetAllTypedRelationships(node *Node, relType string) ([]Relationship, error) {
+	res, err := getRelationships(neo4j, node, fmt.Sprintf("all/%s", relType))
+	return res, err
+}
 
-// 	return relationships, nil
+func (neo4j *Neo4j) GetIncomingTypedRelationships(node *Node, relType string) ([]Relationship, error) {
+	res, err := getRelationships(neo4j, node, fmt.Sprintf("in/%s", relType))
+	return res, err
+}
 
-// }
+func getRelationships(neo4j *Neo4j, node *Node, rel string) ([]Relationship, error) {
+
+	if node.Id == "" {
+		return nil, errors.New("Id is not given")
+	}
+
+	customReq := &ManuelBatchRequest{}
+	customReq.To = fmt.Sprintf("/node/%s/relationships/%s", node.Id, rel)
+	neo4j.NewBatch().Get(customReq).Execute()
+	result := []Relationship{}
+	err := neo4j.GetManualBatchResponse(customReq, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
 
 func (relationship *Relationship) encodeData() (string, error) {
 	result, err := jsonEncode(relationship.Data)

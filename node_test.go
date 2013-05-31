@@ -1,7 +1,6 @@
 package neo4j
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
@@ -40,7 +39,6 @@ func TestGetNodeWithEmptyId(t *testing.T) {
 	if err == nil {
 		t.Error("Error is nil")
 	}
-	fmt.Println(node)
 }
 
 func TestGetNodeWithInvalidId(t *testing.T) {
