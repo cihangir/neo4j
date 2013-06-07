@@ -58,6 +58,18 @@ func (neo4j *Neo4j) GetManualBatchResponse(mbr *ManuelBatchRequest, result inter
 	typeOfResponse := reflect.TypeOf(mbr.Response).String()
 	switch typeOfResult {
 	//if we have an complex type, resolve it
+	case "*[]neo4j.Node":
+		if typeOfResponse != "[]interface {}" {
+			return errors.New("Response is not an array")
+		}
+
+		tempResult := make([]Node, len(mbr.Response.([]interface{})))
+		result = result.(*[]Node)
+		arrayResult := mbr.Response.([]interface{})
+		for i, value := range arrayResult {
+			tempResult[i].mapBatchResponse(neo4j, value)
+		}
+		(*result.(*[]Node)) = tempResult
 	case "*neo4j.Node":
 		_, err := result.(*Node).mapBatchResponse(neo4j, mbr.Response)
 		if err != nil {
