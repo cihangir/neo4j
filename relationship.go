@@ -115,17 +115,18 @@ func prepareRelationshipCreateBatchMap(r *Relationship) (map[string]interface{},
 		return query, errors.New("Relationship type is not valid")
 	}
 
-	query["method"] = "POST"
-	query["to"] = url
-
-	body := make(map[string]interface{})
-	body["to"] = endNodeUrl
-	body["type"] = relationship.Type
-	body["data"] = relationship.Data
-	query["body"] = body
-	return query, nil
 	url := fmt.Sprintf("/node/%s/relationships", r.StartNodeId)
 	endNodeUrl := fmt.Sprintf("/node/%s", r.EndNodeId)
+
+	return map[string]interface{}{
+		"method": "POST",
+		"to":     url,
+		"body": map[string]interface{}{
+			"to":   endNodeUrl,
+			"type": r.Type,
+			"data": r.Data,
+		},
+	}, nil
 }
 
 func prepareRelationshipCreateUniqueBatchMap(r *Relationship) (map[string]interface{}, error) {
@@ -146,16 +147,16 @@ func prepareRelationshipCreateUniqueBatchMap(r *Relationship) (map[string]interf
 	startUrl := fmt.Sprintf("/node/%s", r.StartNodeId)
 	endNodeUrl := fmt.Sprintf("/node/%s", r.EndNodeId)
 
-	query["method"] = "POST"
-	query["to"] = "/index/relationship"
-	query["body"] = map[string]interface{}{
-		"start":      startUrl,
-		"end":        endNodeUrl,
-		"type":       relationship.Type,
-		"properties": relationship.Data,
-	}
-
-	return query, nil
+	return map[string]interface{}{
+		"method": "POST",
+		"to":     "/index/relationships",
+		"body": map[string]interface{}{
+			"start":      startUrl,
+			"end":        endNodeUrl,
+			"type":       r.Type,
+			"properties": r.Data,
+		},
+	}, nil
 }
 
 func prepareRelationshipUpdateBatchMap(r *Relationship) (map[string]interface{}, error) {
@@ -165,9 +166,12 @@ func prepareRelationshipUpdateBatchMap(r *Relationship) (map[string]interface{},
 		return query, errors.New("Id not valid")
 	}
 
-	query["method"] = "PUT"
-	query["to"] = "/node/" + relationship.Id + "/properties"
-	query["body"] = relationship.Data
+	query = map[string]interface{}{
+		"method": "PUT",
+		"to":     fmt.Sprintf("/relationship/%s/properties", r.Id),
+		"body":   r.Data,
+	}
+
 	return query, nil
 }
 
