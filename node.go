@@ -93,15 +93,12 @@ func prepareNodeDeleteBatchMap(n *Node) (map[string]interface{}, error) {
 	return query, nil
 }
 
-func prepareNodeCreateBatchMap(node *Node) (map[string]interface{}, error) {
-
-	query := make(map[string]interface{})
-
-	query["method"] = "POST"
-	query["to"] = "/node"
-	query["body"] = node.Data
-
-	return query, nil
+func prepareNodeCreateBatchMap(n *Node) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"method": "POST",
+		"to":     "/node",
+		"body":   n.Data,
+	}, nil
 }
 
 func prepareNodeUpdateBatchMap(n *Node) (map[string]interface{}, error) {
@@ -118,16 +115,14 @@ func prepareNodeUpdateBatchMap(n *Node) (map[string]interface{}, error) {
 	return query, nil
 }
 
-func prepareNodeCreateUniqueBatchMap(node *Node) (map[string]interface{}, error) {
-
-	query := make(map[string]interface{})
-	query["method"] = "POST"
-	query["to"] = "/index/node"
-	query["body"] = map[string]interface{}{
-		"properties": node.Data,
-	}
-
-	return query, nil
+func prepareNodeCreateUniqueBatchMap(n *Node) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"method": "POST",
+		"to":     "/index/node",
+		"body": map[string]interface{}{
+			"properties": n.Data,
+		},
+	}, nil
 }
 
 func (n *Node) encodeData() (string, error) {
