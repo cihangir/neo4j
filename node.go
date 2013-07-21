@@ -3,6 +3,7 @@ package neo4j
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type Node struct {
@@ -93,7 +94,7 @@ func prepareNodeDeleteBatchMap(node *Node) (map[string]interface{}, error) {
 	}
 
 	query["method"] = "DELETE"
-	query["to"] = "/node/" + node.Id
+	query["to"] = fmt.Sprintf("/node/%s", n.Id)
 
 	return query, nil
 }
@@ -118,8 +119,8 @@ func prepareNodeUpdateBatchMap(node *Node) (map[string]interface{}, error) {
 	}
 
 	query["method"] = "PUT"
-	query["to"] = "/node/" + node.Id + "/properties"
-	query["body"] = node.Data
+	query["to"] = fmt.Sprintf("/node/%s/properties", n.Id)
+	query["body"] = n.Data
 
 	return query, nil
 }
