@@ -67,12 +67,11 @@ func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error
 	}
 }
 
-func prepareNodeGetBatchMap(node *Node) (map[string]interface{}, error) {
-
+func prepareNodeGetBatchMap(n *Node) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if node.Id == "" {
-		return query, errors.New("Id not valid")
+	if n.Id == "" {
+		return query, errors.New("Id field is empty")
 	}
 
 	query["method"] = "GET"
@@ -81,11 +80,10 @@ func prepareNodeGetBatchMap(node *Node) (map[string]interface{}, error) {
 	return query, nil
 }
 
-func prepareNodeDeleteBatchMap(node *Node) (map[string]interface{}, error) {
-
+func prepareNodeDeleteBatchMap(n *Node) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if node.Id == "" {
+	if n.Id == "" {
 		return query, errors.New("Id not valid")
 	}
 
@@ -106,11 +104,10 @@ func prepareNodeCreateBatchMap(node *Node) (map[string]interface{}, error) {
 	return query, nil
 }
 
-func prepareNodeUpdateBatchMap(node *Node) (map[string]interface{}, error) {
-
+func prepareNodeUpdateBatchMap(n *Node) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if node.Id == "" {
+	if n.Id == "" {
 		return query, errors.New("Id not valid")
 	}
 
@@ -133,8 +130,8 @@ func prepareNodeCreateUniqueBatchMap(node *Node) (map[string]interface{}, error)
 	return query, nil
 }
 
-func (node *Node) encodeData() (string, error) {
-	result, err := jsonEncode(node.Data)
+func (n *Node) encodeData() (string, error) {
+	result, err := jsonEncode(n.Data)
 	return result, err
 }
 
