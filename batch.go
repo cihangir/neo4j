@@ -190,23 +190,12 @@ func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 
 // Adds requests to stack
 func (batch *Batch) addToStack(operation string, obj Batcher) {
-
-	stack := batch.Stack
-	length := len(stack)
-
-	if length+1 > cap(stack) {
-		newStack := make([]*BatchRequest, len(stack), (cap(stack)+1)*2) // +1 in case cap(s) == 0
-		copy(newStack, stack)
-		stack = newStack
+	batchRequest := &BatchRequest{
+		Operation: operation,
+		Data:      obj,
 	}
-	stack = stack[0 : length+1]
 
-	batchRequest := &BatchRequest{}
-	batchRequest.Operation = operation
-	batchRequest.Data = obj
-	stack[len(stack)-1] = batchRequest
-	batch.Stack = stack
-
+	batch.Stack = append(batch.Stack, batchRequest)
 }
 
 // Prepares and sends the request to Neo4j, then pars
