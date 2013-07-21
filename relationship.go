@@ -81,7 +81,7 @@ func prepareRelationshipGetBatchMap(r *Relationship) (map[string]interface{}, er
 	}
 
 	query["method"] = "GET"
-	query["to"] = "/relationship/" + relationship.Id
+	query["to"] = fmt.Sprintf("/relationship/%s", r.Id)
 
 	return query, nil
 }
@@ -94,7 +94,7 @@ func prepareRelationshipDeleteBatchMap(r *Relationship) (map[string]interface{},
 	}
 
 	query["method"] = "DELETE"
-	query["to"] = "/relationship/" + relationship.Id
+	query["to"] = fmt.Sprintf("/relationship/%s", r.Id)
 
 	return query, nil
 }
@@ -115,10 +115,6 @@ func prepareRelationshipCreateBatchMap(r *Relationship) (map[string]interface{},
 		return query, errors.New("Relationship type is not valid")
 	}
 
-	url := "/node/" + relationship.StartNodeId + "/relationships"
-
-	endNodeUrl := "/node/" + relationship.EndNodeId
-
 	query["method"] = "POST"
 	query["to"] = url
 
@@ -128,6 +124,8 @@ func prepareRelationshipCreateBatchMap(r *Relationship) (map[string]interface{},
 	body["data"] = relationship.Data
 	query["body"] = body
 	return query, nil
+	url := fmt.Sprintf("/node/%s/relationships", r.StartNodeId)
+	endNodeUrl := fmt.Sprintf("/node/%s", r.EndNodeId)
 }
 
 func prepareRelationshipCreateUniqueBatchMap(r *Relationship) (map[string]interface{}, error) {
@@ -145,9 +143,8 @@ func prepareRelationshipCreateUniqueBatchMap(r *Relationship) (map[string]interf
 		return query, errors.New("Relationship type is not valid")
 	}
 
-	startUrl := "/node/" + relationship.StartNodeId
-
-	endNodeUrl := "/node/" + relationship.EndNodeId
+	startUrl := fmt.Sprintf("/node/%s", r.StartNodeId)
+	endNodeUrl := fmt.Sprintf("/node/%s", r.EndNodeId)
 
 	query["method"] = "POST"
 	query["to"] = "/index/relationship"
