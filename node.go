@@ -30,7 +30,6 @@ type NodeResponse struct {
 
 func (node *Node) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	encodedData, err := jsonEncode(data)
-
 	payload, err := node.decodeResponse(encodedData)
 	if err != nil {
 		return false, err
@@ -44,13 +43,9 @@ func (node *Node) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error)
 	node.Payload = payload
 
 	return true, nil
-
 }
 
 func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error) {
-
-	query := make(map[string]interface{})
-
 	switch operation {
 	case BATCH_GET:
 		query, err := prepareNodeGetBatchMap(node)
@@ -67,8 +62,9 @@ func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error
 	case BATCH_CREATE_UNIQUE:
 		query, err := prepareNodeCreateUniqueBatchMap(node)
 		return query, err
+	default:
+		return map[string]interface{}{}, nil
 	}
-	return query, nil
 }
 
 func prepareNodeGetBatchMap(node *Node) (map[string]interface{}, error) {
@@ -80,7 +76,7 @@ func prepareNodeGetBatchMap(node *Node) (map[string]interface{}, error) {
 	}
 
 	query["method"] = "GET"
-	query["to"] = "/node/" + node.Id
+	query["to"] = fmt.Sprintf("/node/%s", n.Id)
 
 	return query, nil
 }
