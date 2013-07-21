@@ -26,7 +26,6 @@ type RelationshipResponse struct {
 }
 
 func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
-
 	url := fmt.Sprintf("%s/types", neo4j.RelationshipUrl)
 	result := make([]string, 0)
 	response, err := neo4j.doRequest("GET", url, "")
@@ -42,43 +41,42 @@ func (neo4j *Neo4j) GetRelationshipTypes() ([]string, error) {
 	return result, err
 }
 
-func (relationship *Relationship) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
+func (r *Relationship) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	// because data is a map, convert back to Json
 	encodedData, err := jsonEncode(data)
-	result, err := relationship.decode(neo4j, encodedData)
+	result, err := r.decode(neo4j, encodedData)
 
 	return result, err
 }
 
-func (relationship *Relationship) getBatchQuery(operation string) (map[string]interface{}, error) {
+func (r *Relationship) getBatchQuery(operation string) (map[string]interface{}, error) {
 
 	query := make(map[string]interface{})
 
 	switch operation {
 	case BATCH_GET:
-		query, err := prepareRelationshipGetBatchMap(relationship)
+		query, err := prepareRelationshipGetBatchMap(r)
 		return query, err
 	case BATCH_UPDATE:
-		query, err := prepareRelationshipUpdateBatchMap(relationship)
+		query, err := prepareRelationshipUpdateBatchMap(r)
 		return query, err
 	case BATCH_CREATE:
-		query, err := prepareRelationshipCreateBatchMap(relationship)
+		query, err := prepareRelationshipCreateBatchMap(r)
 		return query, err
 	case BATCH_DELETE:
-		query, err := prepareRelationshipDeleteBatchMap(relationship)
+		query, err := prepareRelationshipDeleteBatchMap(r)
 		return query, err
 	case BATCH_CREATE_UNIQUE:
-		query, err := prepareRelationshipCreateUniqueBatchMap(relationship)
+		query, err := prepareRelationshipCreateUniqueBatchMap(r)
 		return query, err
 	}
 	return query, nil
 }
 
-func prepareRelationshipGetBatchMap(relationship *Relationship) (map[string]interface{}, error) {
-
+func prepareRelationshipGetBatchMap(r *Relationship) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if relationship.Id == "" {
+	if r.Id == "" {
 		return query, errors.New("Id not valid")
 	}
 
@@ -88,11 +86,10 @@ func prepareRelationshipGetBatchMap(relationship *Relationship) (map[string]inte
 	return query, nil
 }
 
-func prepareRelationshipDeleteBatchMap(relationship *Relationship) (map[string]interface{}, error) {
-
+func prepareRelationshipDeleteBatchMap(r *Relationship) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if relationship.Id == "" {
+	if r.Id == "" {
 		return query, errors.New("Id not valid")
 	}
 
@@ -102,19 +99,19 @@ func prepareRelationshipDeleteBatchMap(relationship *Relationship) (map[string]i
 	return query, nil
 }
 
-func prepareRelationshipCreateBatchMap(relationship *Relationship) (map[string]interface{}, error) {
+func prepareRelationshipCreateBatchMap(r *Relationship) (map[string]interface{}, error) {
 
 	query := make(map[string]interface{})
 
-	if relationship.StartNodeId == "" {
+	if r.StartNodeId == "" {
 		return query, errors.New("Start Node Id not valid")
 	}
 
-	if relationship.EndNodeId == "" {
+	if r.EndNodeId == "" {
 		return query, errors.New("End Node Id not valid")
 	}
 
-	if relationship.Type == "" {
+	if r.Type == "" {
 		return query, errors.New("Relationship type is not valid")
 	}
 
@@ -133,19 +130,18 @@ func prepareRelationshipCreateBatchMap(relationship *Relationship) (map[string]i
 	return query, nil
 }
 
-func prepareRelationshipCreateUniqueBatchMap(relationship *Relationship) (map[string]interface{}, error) {
-
+func prepareRelationshipCreateUniqueBatchMap(r *Relationship) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if relationship.StartNodeId == "" {
+	if r.StartNodeId == "" {
 		return query, errors.New("Start Node Id not valid")
 	}
 
-	if relationship.EndNodeId == "" {
+	if r.EndNodeId == "" {
 		return query, errors.New("End Node Id not valid")
 	}
 
-	if relationship.Type == "" {
+	if r.Type == "" {
 		return query, errors.New("Relationship type is not valid")
 	}
 
@@ -165,11 +161,10 @@ func prepareRelationshipCreateUniqueBatchMap(relationship *Relationship) (map[st
 	return query, nil
 }
 
-func prepareRelationshipUpdateBatchMap(relationship *Relationship) (map[string]interface{}, error) {
-
+func prepareRelationshipUpdateBatchMap(r *Relationship) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if relationship.Id == "" {
+	if r.Id == "" {
 		return query, errors.New("Id not valid")
 	}
 
@@ -209,14 +204,13 @@ func (neo4j *Neo4j) GetIncomingTypedRelationships(node *Node, relType string) ([
 	return res, err
 }
 
-func getRelationships(neo4j *Neo4j, node *Node, rel string) ([]Relationship, error) {
-
+func getRelationships(neo4j *Neo4j, node *Node, direction string) ([]Relationship, error) {
 	if node.Id == "" {
 		return nil, errors.New("Id is not given")
 	}
 
 	customReq := &ManuelBatchRequest{}
-	customReq.To = fmt.Sprintf("/node/%s/relationships/%s", node.Id, rel)
+	customReq.To = fmt.Sprintf("/node/%s/relationships/%s", node.Id, direction)
 	neo4j.NewBatch().Get(customReq).Execute()
 	result := []Relationship{}
 	err := neo4j.GetManualBatchResponse(customReq, &result)
@@ -226,13 +220,12 @@ func getRelationships(neo4j *Neo4j, node *Node, rel string) ([]Relationship, err
 	return result, nil
 }
 
-func (relationship *Relationship) encodeData() (string, error) {
-	result, err := jsonEncode(relationship.Data)
+func (r *Relationship) encodeData() (string, error) {
+	result, err := jsonEncode(r.Data)
 	return result, err
 }
 
-func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error) {
-
+func (r *Relationship) decode(neo4j *Neo4j, data string) (bool, error) {
 	payload := &RelationshipResponse{}
 
 	// Map json to our RelationshipResponse struct
@@ -242,33 +235,13 @@ func (relationship *Relationship) decode(neo4j *Neo4j, data string) (bool, error
 	}
 
 	// Map returning result to our relationship struct
-	err = mapRelationship(neo4j, relationship, payload)
+	err = mapRelationship(neo4j, r, payload)
 	if err != nil {
 		return false, err
 	}
 
 	return true, nil
 }
-
-// func (relationship *[]Relationship) decodeArray(neo4j *Neo4j, data string) (bool, error) {
-
-// 	payload := []RelationshipResponse{}
-
-// 	err := jsonDecode(data, &payload)
-// 	// err := json.Unmarshal([]byte(data), payload)
-// 	if err != nil {
-// 		return false, err
-// 	}
-
-// 	for k, v := range payload {
-// 		err := mapRelationship(neo4j, relationship, &payload)
-// 		if err != nil {
-// 			return false, err
-// 		}
-// 	}
-
-// 	return true, nil
-// }
 
 func mapRelationship(neo4j *Neo4j, relationship *Relationship, payload *RelationshipResponse) error {
 
