@@ -62,9 +62,9 @@ func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error
 	case BATCH_CREATE_UNIQUE:
 		query, err := prepareNodeCreateUniqueBatchMap(node)
 		return query, err
-	default:
-		return map[string]interface{}{}, nil
 	}
+	return map[string]interface{}{}, nil
+
 }
 
 func prepareNodeGetBatchMap(n *Node) (map[string]interface{}, error) {
