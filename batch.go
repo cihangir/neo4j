@@ -138,12 +138,10 @@ func (batch *Batch) GetLastIndex() string {
 
 // Creates New Batch request handler
 func (neo4j *Neo4j) NewBatch() *Batch {
-	stack := make([]*BatchRequest, 0, 2)
-	batch := &Batch{}
-	batch.Neo4j = neo4j
-	batch.Stack = stack
-
-	return batch
+	return &Batch{
+		Neo4j: neo4j,
+		Stack: make([]*BatchRequest, 0),
+	}
 }
 
 // Get request to Neo4j as batch
