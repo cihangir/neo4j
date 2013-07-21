@@ -174,13 +174,14 @@ func (batch *Batch) Update(obj Batcher) *Batch {
 	return batch
 }
 
-// Update request to Neo4j as batch
+// Batch unique create request to Neo4j
 func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 
 	//encapsulating the object
-	uniqueRequest := &UniqueRequest{}
-	uniqueRequest.Data = obj
-	uniqueRequest.Properties = properties
+	uniqueRequest := &UniqueRequest{
+		Properties: properties,
+		Data:       obj,
+	}
 
 	batch.addToStack(BATCH_CREATE_UNIQUE, uniqueRequest)
 
