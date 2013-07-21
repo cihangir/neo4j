@@ -201,6 +201,7 @@ func (batch *Batch) addToStack(operation string, obj Batcher) {
 // Prepares and sends the request to Neo4j, then pars
 func (batch *Batch) Execute() ([]*BatchResponse, error) {
 
+	// if Neo4j instance is not cretaed return an error
 	if batch.Neo4j == nil {
 		return nil, errors.New("Batch request is not created by NewBatch method!")
 	}
@@ -219,6 +220,7 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	encodedRequest, err := jsonEncode(request)
 	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
 	if err != nil {
@@ -259,6 +261,8 @@ func prepareRequest(stack []*BatchRequest) ([]map[string]interface{}, error) {
 func (batch *Batch) mapResponse(response []*BatchResponse) {
 
 	for _, val := range response {
+		// id is an Neo4j batch request feature, it returns back the id that we send
+		// so we can use it here to map results into our stack
 		id := val.Id
 		batch.Stack[id].Data.mapBatchResponse(batch.Neo4j, val.Body)
 	}
