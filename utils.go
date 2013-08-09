@@ -1,5 +1,5 @@
-// this file works a helper class for other files
 package neo4j
+// this file works a helper class for other files
 
 import (
 	"encoding/json"
