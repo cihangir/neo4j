@@ -1,4 +1,5 @@
 package neo4j
+
 // this file works a helper class for other files
 
 import (
@@ -6,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+
 	"net/http"
 	"strings"
 )

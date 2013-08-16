@@ -3,10 +3,9 @@
 package neo4j
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
-
 	"net/http"
 	"net/url"
 )
@@ -17,7 +16,7 @@ type ManuelRequest struct {
 	Params map[string]string
 }
 
-func (neo4j *Neo4j) Request(mr *ManuelRequest) error {
+func (neo4j *Neo4j) Request(mr *ManuelRequest) ([]string, error) {
 	params := url.Values{}
 	for key, value := range mr.Params {
 		params.Add(key, value)
@@ -27,7 +26,7 @@ func (neo4j *Neo4j) Request(mr *ManuelRequest) error {
 
 	req, err := http.NewRequest(mr.Method, finalUrl, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -35,19 +34,27 @@ func (neo4j *Neo4j) Request(mr *ManuelRequest) error {
 
 	res, err := neo4j.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if res.StatusCode != 200 && res.StatusCode != 204 {
-		return fmt.Errorf(res.Status)
+		return nil, fmt.Errorf(res.Status)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
+	if res.StatusCode == 200 {
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		result := make([]string, 0)
+		err = json.Unmarshal(body, &result)
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
 	}
 
-	log.Println(string(body))
-
-	return nil
+	return nil, nil
 }

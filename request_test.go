@@ -16,7 +16,7 @@ func TestCreateAndDeleteEvents(t *testing.T) {
 		},
 	}
 
-	err := Connect("").Request(req)
+	_, err := Connect("").Request(req)
 	if err != nil {
 		t.Error(err)
 	}
@@ -30,7 +30,7 @@ func TestCreateAndDeleteEvents(t *testing.T) {
 		},
 	}
 
-	err = Connect("").Request(req)
+	_, err = Connect("").Request(req)
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +48,7 @@ func TestCreateAndDeleteSubscriptions(t *testing.T) {
 		},
 	}
 
-	err := Connect("").Request(req)
+	_, err := Connect("").Request(req)
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,32 +62,16 @@ func TestCreateAndDeleteSubscriptions(t *testing.T) {
 		},
 	}
 
-	err = Connect("").Request(req)
+	_, err = Connect("").Request(req)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestGetEvents(t *testing.T) {
-	sourceId, eventId := createNodes("source", "event", t)
+	streamId, sourceId := createNodes("stream", "source", t)
 
 	req := &ManuelRequest{
-		Method: "POST",
-		To:     "http://localhost:7474/graphity/events",
-		Params: map[string]string{
-			"source": sourceId,
-			"event":  eventId,
-		},
-	}
-
-	err := Connect("").Request(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	streamId, _ := createNodes("stream", "source", t)
-
-	req = &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/subscriptions",
 		Params: map[string]string{
@@ -96,7 +80,41 @@ func TestGetEvents(t *testing.T) {
 		},
 	}
 
-	err = Connect("").Request(req)
+	_, err := Connect("").Request(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, eventId := createNodes("_", "event", t)
+
+	req = &ManuelRequest{
+		Method: "POST",
+		To:     "http://localhost:7474/graphity/events",
+		Params: map[string]string{
+			"source":    sourceId,
+			"event":     eventId,
+			"timestamp": "1",
+		},
+	}
+
+	_, err = Connect("").Request(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, eventId = createNodes("_", "event", t)
+
+	req = &ManuelRequest{
+		Method: "POST",
+		To:     "http://localhost:7474/graphity/events",
+		Params: map[string]string{
+			"source":    sourceId,
+			"event":     eventId,
+			"timestamp": "2",
+		},
+	}
+
+	_, err = Connect("").Request(req)
 	if err != nil {
 		t.Error(err)
 	}
@@ -106,22 +124,27 @@ func TestGetEvents(t *testing.T) {
 		To:     "http://localhost:7474/graphity/events",
 		Params: map[string]string{
 			"stream": streamId,
+			"count":  "10",
 		},
 	}
 
-	err = Connect("").Request(req)
+	nodeIds, err := Connect("").Request(req)
 	if err != nil {
 		t.Error(err)
+	}
+
+	if len(nodeIds) < 2 {
+		t.Error("not enough results")
 	}
 }
 
 func createNodes(nodeOneName, nodeTwoName string, t *testing.T) (nodeOneId, nodeTwoId string) {
 	nodeOne := &Node{
-		Data: map[string]interface{}{"name": nodeOneId},
+		Data: map[string]interface{}{"name": nodeOneName},
 	}
 
 	nodeTwo := &Node{
-		Data: map[string]interface{}{"name": nodeTwoId},
+		Data: map[string]interface{}{"name": nodeTwoName},
 	}
 
 	batch := Connect("").NewBatch()
