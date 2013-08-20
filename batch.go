@@ -131,6 +131,8 @@ func (mbr *ManuelBatchRequest) mapBatchResponse(neo4j *Neo4j, data interface{}) 
 }
 
 // Returns last index of current stack
+// This method can be used to obtain the latest index for creating
+// manual batch requests or injecting the order number of pre-added request(s) id
 func (batch *Batch) GetLastIndex() string {
 
 	return strconv.Itoa(len(batch.Stack) - 1)
@@ -187,6 +189,7 @@ func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 }
 
 // Adds requests to stack
+// Used internally to pile up the batch request
 func (batch *Batch) addToStack(operation string, obj Batcher) {
 	batchRequest := &BatchRequest{
 		Operation: operation,
@@ -196,14 +199,15 @@ func (batch *Batch) addToStack(operation string, obj Batcher) {
 	batch.Stack = append(batch.Stack, batchRequest)
 }
 
-// Prepares and sends the request to Neo4j, then pars
+// Prepares and sends the request to Neo4j
+// If the request is successful then parses the response
 func (batch *Batch) Execute() ([]*BatchResponse, error) {
 
-	// if Neo4j instance is not cretaed return an error
+	// if Neo4j instance is not created return an error
 	if batch.Neo4j == nil {
 		return nil, errors.New("Batch request is not created by NewBatch method!")
 	}
-	// cache batch stack lengh
+	// cache batch stack length
 	stackLength := len(batch.Stack)
 
 	//create result array

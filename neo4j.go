@@ -70,7 +70,7 @@ func Connect(url string) *Neo4j {
 //    neo4jConnection := Connect("")
 //    rel             := &Relationship{}
 //    rel.Id          = "2229"
-//    neo4jConnection.get(rel)
+//    neo4jConnection.Get(rel)
 func (neo4j *Neo4j) Get(obj Batcher) error {
 	_, err := neo4j.NewBatch().Get(obj).Execute()
 
@@ -88,7 +88,7 @@ func (neo4j *Neo4j) Get(obj Batcher) error {
 //    rel.StartNodeId = node.Id
 //    rel.EndNodeId   = node2.Id
 //
-//    neo4jConnection.get(rel)
+//    neo4jConnection.Get(rel)
 func (neo4j *Neo4j) Create(obj Batcher) error {
 	_, err := neo4j.NewBatch().Create(obj).Execute()
 

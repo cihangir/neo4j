@@ -30,6 +30,6 @@ go get github.com/siesta/neo4j
     neo4jConnection := Connect("")
     rel             := &Relationship{}
     rel.Id          = "2412"
-    neo4jConnection.get(rel)
+    neo4jConnection.Get(rel)
 
 ```
