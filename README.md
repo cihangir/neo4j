@@ -1,6 +1,8 @@
 neo4j.go
 ========
 
+[![Build Status](https://travis-ci.org/siesta/neo4j.png)](https://travis-ci.org/siesta/neo4j)
+
 Implementation of client package for communication with Neo4j Rest API.
 
 For more information and documentation please read [Godoc Neo4j Page](http://godoc.org/github.com/siesta/neo4j)
