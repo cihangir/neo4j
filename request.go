@@ -1,5 +1,3 @@
-// +build graphity
-
 package neo4j
 
 import (
