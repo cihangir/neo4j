@@ -3,8 +3,8 @@ package neo4j
 import "encoding/json"
 
 type Cypher struct {
-	Query  string
-	Params map[string]interface{}
+	Query   map[string]string
+	Payload []*NodeResponse
 }
 
 type CypherResponse struct {
@@ -12,19 +12,14 @@ type CypherResponse struct {
 	Data    map[string]interface{} `json:"data"`
 }
 
-func (node *Node) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
+func (c *Cypher) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	encodedData, err := jsonEncode(data)
-	payload, err := node.decodeResponse(encodedData)
+	payload, err := c.decodeResponse(encodedData)
 	if err != nil {
 		return false, err
 	}
-	id, err := getIdFromUrl(neo4j.NodeUrl, payload.Self)
-	if err != nil {
-		return false, nil
-	}
-	node.Id = id
-	node.Data = payload.Data
-	node.Payload = payload
+
+	c.Payload = payload
 
 	return true, nil
 }
@@ -33,22 +28,31 @@ func (c *Cypher) getBatchQuery(operation string) (map[string]interface{}, error)
 	return map[string]interface{}{
 		"method": "POST",
 		"to":     "/cypher",
-		"body":   c,
+		"body":   c.Query,
 	}, nil
 }
 
-func (n *Node) encodeData() (string, error) {
-	result, err := jsonEncode(n.Data)
-	return result, err
-}
+func (c *Cypher) decodeResponse(data string) ([]*NodeResponse, error) {
+	resp := map[string]interface{}{}
 
-func (node *Node) decodeResponse(data string) (*NodeResponse, error) {
-	nodeResponse := &NodeResponse{}
-
-	err := json.Unmarshal([]byte(data), nodeResponse)
+	err := json.Unmarshal([]byte(data), &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return nodeResponse, nil
+	columnData := resp["data"].([]interface{})[0]
+
+	jsonColumnData, err := json.Marshal(columnData)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*NodeResponse, 0)
+
+	err = json.Unmarshal(jsonColumnData, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

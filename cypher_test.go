@@ -1,37 +1,30 @@
 package neo4j
 
 import (
+	"log"
+
 	"testing"
 )
 
 func TestSendCypherQuery(t *testing.T) {
 	neo4jConnection := Connect("")
 
-	cyper := &Cypher{
-		Query  : `
-			START group=node:koding(id={groupId})
-			MATCH group-[r:member]->members<-[:follower]-currentUser
-			WHERE currentUser.id = {currentUserId}
-			RETURN members
-			ORDER BY {orderByQuery} DESC
-			SKIP {skipCount}
-			LIMIT {limitCount}
-		`
-		Params : map[string]{
-
-		}
+	cypher := &Cypher{
+		Query: map[string]string{
+			"query": `
+        START k=node(*)
+        return k
+		  `,
+		},
 	}
-	data := make(map[string]interface{})
-	data["hede"] = "debe"
 
-	node := &Node{}
-	node.Data = data
-	node2 := &Node{}
-	node2.Data = data
-
-	//create batch request for node
 	batch := neo4jConnection.NewBatch()
-	batch.Create(node)
-	batch.Create(node2)
+	batch.Create(cypher)
 	batch.Execute()
+
+	if cypher.Payload == nil {
+		t.Error("No cypher results")
+	}
+
+	log.Println(cypher.Payload[0])
 }
