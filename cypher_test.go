@@ -1,10 +1,6 @@
 package neo4j
 
-import (
-	"log"
-
-	"testing"
-)
+import "testing"
 
 func TestSendCypherQuery(t *testing.T) {
 	neo4jConnection := Connect("")
@@ -25,6 +21,4 @@ func TestSendCypherQuery(t *testing.T) {
 	if cypher.Payload == nil {
 		t.Error("No cypher results")
 	}
-
-	log.Println(cypher.Payload[0])
 }
