@@ -10,13 +10,13 @@ func TestCreateAndDeleteEvents(t *testing.T) {
 	req := &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/events",
-		Params: map[string]string{
+		Body: map[string]string{
 			"source": sourceId,
 			"event":  eventId,
 		},
 	}
 
-	_, err := Connect("").Request(req)
+	err := req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,13 +24,13 @@ func TestCreateAndDeleteEvents(t *testing.T) {
 	req = &ManuelRequest{
 		Method: "DELETE",
 		To:     "http://localhost:7474/graphity/events",
-		Params: map[string]string{
+		Body: map[string]string{
 			"source": sourceId,
 			"event":  eventId,
 		},
 	}
 
-	_, err = Connect("").Request(req)
+	err = req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -42,13 +42,13 @@ func TestCreateAndDeleteSubscriptions(t *testing.T) {
 	req := &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/subscriptions",
-		Params: map[string]string{
+		Body: map[string]string{
 			"stream": streamId,
 			"source": sourceId,
 		},
 	}
 
-	_, err := Connect("").Request(req)
+	err := req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -56,13 +56,13 @@ func TestCreateAndDeleteSubscriptions(t *testing.T) {
 	req = &ManuelRequest{
 		Method: "DELETE",
 		To:     "http://localhost:7474/graphity/subscriptions",
-		Params: map[string]string{
+		Body: map[string]string{
 			"stream": streamId,
 			"source": sourceId,
 		},
 	}
 
-	_, err = Connect("").Request(req)
+	err = req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -74,13 +74,13 @@ func TestGetEvents(t *testing.T) {
 	req := &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/subscriptions",
-		Params: map[string]string{
+		Body: map[string]string{
 			"stream": streamId,
 			"source": sourceId,
 		},
 	}
 
-	_, err := Connect("").Request(req)
+	err := req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -90,14 +90,14 @@ func TestGetEvents(t *testing.T) {
 	req = &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/events",
-		Params: map[string]string{
+		Body: map[string]string{
 			"source":    sourceId,
 			"event":     eventId,
 			"timestamp": "1",
 		},
 	}
 
-	_, err = Connect("").Request(req)
+	err = req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -107,14 +107,14 @@ func TestGetEvents(t *testing.T) {
 	req = &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/events",
-		Params: map[string]string{
+		Body: map[string]string{
 			"source":    sourceId,
 			"event":     eventId,
 			"timestamp": "2",
 		},
 	}
 
-	_, err = Connect("").Request(req)
+	err = req.Post()
 	if err != nil {
 		t.Error(err)
 	}
@@ -128,7 +128,7 @@ func TestGetEvents(t *testing.T) {
 		},
 	}
 
-	nodeIds, err := Connect("").Request(req)
+	nodeIds, err := req.Get()
 	if err != nil {
 		t.Error(err)
 	}
