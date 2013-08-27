@@ -4,7 +4,7 @@ import "encoding/json"
 
 type Cypher struct {
 	Query   map[string]string
-	Payload []*NodeResponse
+	Payload interface{}
 }
 
 type CypherResponse struct {
@@ -14,12 +14,10 @@ type CypherResponse struct {
 
 func (c *Cypher) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error) {
 	encodedData, err := jsonEncode(data)
-	payload, err := c.decodeResponse(encodedData)
+	err = c.decodeResponse(encodedData)
 	if err != nil {
 		return false, err
 	}
-
-	c.Payload = payload
 
 	return true, nil
 }
@@ -32,27 +30,24 @@ func (c *Cypher) getBatchQuery(operation string) (map[string]interface{}, error)
 	}, nil
 }
 
-func (c *Cypher) decodeResponse(data string) ([]*NodeResponse, error) {
+func (c *Cypher) decodeResponse(data string) error {
 	resp := map[string]interface{}{}
 
 	err := json.Unmarshal([]byte(data), &resp)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	columnData := resp["data"].([]interface{})[0]
-
-	jsonColumnData, err := json.Marshal(columnData)
+	columnData := resp["data"].([]interface{})
+	jsonizedData, err := json.Marshal(columnData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	res := make([]*NodeResponse, 0)
-
-	err = json.Unmarshal(jsonColumnData, &res)
+	err = json.Unmarshal(jsonizedData, &c.Payload)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return res, nil
+	return nil
 }
