@@ -38,8 +38,7 @@ func (c *Cypher) decodeResponse(data string) error {
 		return err
 	}
 
-	columnData := resp["data"].([]interface{})
-	jsonizedData, err := json.Marshal(columnData)
+	jsonizedData, err := json.Marshal(resp)
 	if err != nil {
 		return err
 	}

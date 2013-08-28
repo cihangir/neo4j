@@ -9,18 +9,21 @@ func TestSendCypherQuery(t *testing.T) {
 		Query: map[string]string{
 			"query": `
         START k=node(2635, 2637)
-        return k.event
+        return k.event as event, id(k) as eventNodeId
 		  `,
 		},
-		Payload: []string{},
+		Payload: map[string]interface{}{},
 	}
 
 	batch := neo4jConnection.NewBatch()
 	batch.Create(cypher)
-	batch.Execute()
+	_, err := batch.Execute()
+	if err != nil {
+		t.Error(err)
+	}
 
-	if cypher.Payload == nil {
-		t.Error("No cypher results")
+	if cypher.Payload.(map[string]interface{})["data"] == nil {
+		t.Error("no data")
 	}
 }
 
