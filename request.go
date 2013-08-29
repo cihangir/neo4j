@@ -57,6 +57,11 @@ func (mr *ManuelRequest) Post() error {
 		return err
 	}
 
+	_, err = mr.decodeResponse(res)
+	if err != nil {
+		return err
+	}
+
 	defer res.Body.Close()
 
 	return nil
