@@ -1,23 +1,37 @@
 package neo4j
 
-import "testing"
+import (
+	"fmt"
+
+	"testing"
+)
 
 func TestSendCypherQuery(t *testing.T) {
 	neo4jConnection := Connect("")
+	node := &Node{}
+	node2 := &Node{}
+
+	batchNode := neo4jConnection.NewBatch()
+	batchNode.Create(node)
+	batchNode.Create(node2)
+	_, err := batchNode.Execute()
+	if err != nil {
+		t.Error(err)
+	}
 
 	cypher := &Cypher{
 		Query: map[string]string{
-			"query": `
-        START k=node(2635, 2637)
-        return k.event as event, id(k) as eventNodeId
-		  `,
+			"query": fmt.Sprintf(`
+        START k=node(%v, %v)
+        return id(k) as eventNodeId
+		  `, node.Id, node2.Id),
 		},
 		Payload: map[string]interface{}{},
 	}
 
 	batch := neo4jConnection.NewBatch()
 	batch.Create(cypher)
-	_, err := batch.Execute()
+	_, err = batch.Execute()
 	if err != nil {
 		t.Error(err)
 	}
@@ -32,10 +46,10 @@ func TestSendCypherQueryWithNoResults(t *testing.T) {
 
 	cypher := &Cypher{
 		Query: map[string]string{
-			"query": `
-        START k=node(239494)
+			"query": fmt.Sprintf(`
+        START k=node(%v)
         return k
-		  `,
+		  `),
 		},
 	}
 
