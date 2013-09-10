@@ -69,7 +69,7 @@ func (mr *ManuelRequest) Post() error {
 
 func (mr *ManuelRequest) decodeResponse(res *http.Response) ([]string, error) {
 	switch res.StatusCode {
-	case 200:
+	case 200, 500:
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return nil, err
