@@ -10,7 +10,6 @@ import (
 )
 
 type ManuelRequest struct {
-	Method string
 	To     string
 	Params map[string]string
 	Body   map[string]string
@@ -18,11 +17,35 @@ type ManuelRequest struct {
 
 func (mr *ManuelRequest) Get() ([]string, error) {
 	urlWithParams := mr.encodeParams()
-	req, err := http.NewRequest(mr.Method, urlWithParams, nil)
+	req, err := http.NewRequest("GET", urlWithParams, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	resp, err := mr.getDeleteHelper(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (mr *ManuelRequest) Delete() error {
+	urlWithParams := mr.encodeParams()
+	req, err := http.NewRequest("DELETE", urlWithParams, nil)
+	if err != nil {
+		return err
+	}
+
+	_, err = mr.getDeleteHelper(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (mr *ManuelRequest) getDeleteHelper(req *http.Request) ([]string, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -44,7 +67,7 @@ func (mr *ManuelRequest) Post() error {
 	}
 
 	jsonBody := strings.NewReader(body)
-	req, err := http.NewRequest(mr.Method, mr.To, jsonBody)
+	req, err := http.NewRequest("POST", mr.To, jsonBody)
 	if err != nil {
 		return err
 	}
