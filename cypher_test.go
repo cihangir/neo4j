@@ -2,7 +2,6 @@ package neo4j
 
 import (
 	"fmt"
-
 	"testing"
 )
 
