@@ -149,7 +149,7 @@ func prepareRelationshipCreateUniqueBatchMap(r *Relationship) (map[string]interf
 
 	return map[string]interface{}{
 		"method": "POST",
-		"to":     "/index/relationships",
+		"to":     "/index/relationship",
 		"body": map[string]interface{}{
 			"start":      startUrl,
 			"end":        endNodeUrl,
