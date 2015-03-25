@@ -45,9 +45,10 @@ type BatchResponse struct {
 //  ManuelBatchRequest is here to support referance passing requests in a transaction
 // For more information please check : http://docs.neo4j.org/chunked/stable/rest-api-batch-ops.html
 type ManuelBatchRequest struct {
-	To       string
-	Body     map[string]interface{}
-	Response interface{}
+	To         string
+	Body       map[string]interface{}
+	StringBody string
+	Response   interface{}
 }
 
 // Implement Batcher interface
@@ -104,7 +105,12 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 	query := make(map[string]interface{})
 
 	query["to"] = mbr.To
-	query["body"] = mbr.Body
+
+	if mbr.StringBody != "" && (len(mbr.StringBody) > 0) {
+		query["body"] = mbr.StringBody
+	} else {
+		query["body"] = mbr.Body
+	}
 
 	switch operation {
 	case BATCH_GET:

@@ -285,6 +285,33 @@ func createNewNode() *Node {
 	return node
 }
 
+func TestBatchWithManualBatchQueryWithLabels(t *testing.T) {
+	neo4jConnection := Connect("")
+	batch := neo4jConnection.NewBatch()
+
+	node := createNewNode()
+	batch.Create(node)
+
+	manuelLabel := &ManuelBatchRequest{}
+	manuelLabel.To = "{0}/labels"
+	manuelLabel.StringBody = "newlabelfrombatch"
+
+	batch.Create(manuelLabel)
+
+	res, err := batch.Execute()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(res) != 2 {
+		t.Error(len(res), "Response length is not valid")
+	}
+
+	if node.Id == "" {
+		t.Error("node id is empty")
+	}
+}
+
 func TestBatchWithManualBatchQuery(t *testing.T) {
 	neo4jConnection := Connect("")
 	batch := neo4jConnection.NewBatch()
