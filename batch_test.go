@@ -312,6 +312,47 @@ func TestBatchWithManualBatchQueryWithLabels(t *testing.T) {
 	}
 }
 
+// To add multiple labels to multiple nodes, you need to first add
+// all the node creation operations to the batch and then add the
+// label creation operations
+func TestBatchWithManualBatchQueryWithMultipleLabels(t *testing.T) {
+	neo4jConnection := Connect("")
+	batch := neo4jConnection.NewBatch()
+
+	node := createNewNode()
+	batch.Create(node)
+
+	node2 := createNewNode()
+	batch.Create(node2)
+
+	manuelLabel := &ManuelBatchRequest{}
+	manuelLabel.To = "{0}/labels"
+	manuelLabel.StringBody = "newlabelfrombatch"
+	batch.Create(manuelLabel)
+
+	manuelLabel2 := &ManuelBatchRequest{}
+	manuelLabel2.To = "{1}/labels"
+	manuelLabel2.StringBody = "newlabelfrombatch"
+	batch.Create(manuelLabel2)
+
+	res, err := batch.Execute()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(res) != 4 {
+		t.Error(len(res), "Response length is not valid")
+	}
+
+	if node.ID == "" {
+		t.Error("node id is empty")
+	}
+
+	if node2.ID == "" {
+		t.Error("node id is empty")
+	}
+}
+
 func TestBatchWithManualBatchQuery(t *testing.T) {
 	neo4jConnection := Connect("")
 	batch := neo4jConnection.NewBatch()
