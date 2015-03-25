@@ -2,11 +2,13 @@ package neo4j
 
 import "encoding/json"
 
+// Cypher struct
 type Cypher struct {
 	Query   map[string]string
 	Payload interface{}
 }
 
+// CypherResponse struct for the Neo4J cyhpher query response
 type CypherResponse struct {
 	Columns map[string]interface{} `json:"columns"`
 	Data    map[string]interface{} `json:"data"`

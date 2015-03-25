@@ -22,27 +22,27 @@ var (
 	BATCH_CREATE_UNIQUE = "createUnique"
 )
 
-// Base struct to support request
+// Batch Base struct to support request
 type Batch struct {
 	Neo4j *Neo4j
 	Stack []*BatchRequest
 }
 
-// All batch request structs will be encapslated in this struct
+// BatchRequest All batch request structs will be encapslated in this struct
 type BatchRequest struct {
 	Operation string
 	Data      Batcher
 }
 
-// All returning results from Neo4j will be in BatchResponse format
+// BatchResponse All returning results from Neo4j will be in BatchResponse format
 type BatchResponse struct {
-	Id       int         `json:"id"`
+	ID       int         `json:"id"`
 	Location string      `json:"location"`
 	Body     interface{} `json:"body"`
 	From     string      `json:"from"`
 }
 
-//  ManuelBatchRequest is here to support referance passing requests in a transaction
+// ManuelBatchRequest is here to support referance passing requests in a transaction
 // For more information please check : http://docs.neo4j.org/chunked/stable/rest-api-batch-ops.html
 type ManuelBatchRequest struct {
 	To         string
@@ -51,7 +51,7 @@ type ManuelBatchRequest struct {
 	Response   interface{}
 }
 
-// Implement Batcher interface
+// GetManualBatchResponse Implements Batcher interface
 func (neo4j *Neo4j) GetManualBatchResponse(mbr *ManuelBatchRequest, result interface{}) error {
 
 	//get type of current value
@@ -136,7 +136,7 @@ func (mbr *ManuelBatchRequest) mapBatchResponse(neo4j *Neo4j, data interface{}) 
 	return true, nil
 }
 
-// Returns last index of current stack
+// GetLastIndex Returns last index of current stack
 // This method can be used to obtain the latest index for creating
 // manual batch requests or injecting the order number of pre-added request(s) id
 func (batch *Batch) GetLastIndex() string {
@@ -144,7 +144,7 @@ func (batch *Batch) GetLastIndex() string {
 	return strconv.Itoa(len(batch.Stack) - 1)
 }
 
-// Creates New Batch request handler
+// NewBatch Creates New Batch request handler
 func (neo4j *Neo4j) NewBatch() *Batch {
 	return &Batch{
 		Neo4j: neo4j,
@@ -180,7 +180,7 @@ func (batch *Batch) Update(obj Batcher) *Batch {
 	return batch
 }
 
-// Batch unique create request to Neo4j
+// CreateUnique Batch unique create request to Neo4j
 func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 
 	//encapsulating the object
@@ -205,7 +205,7 @@ func (batch *Batch) addToStack(operation string, obj Batcher) {
 	batch.Stack = append(batch.Stack, batchRequest)
 }
 
-// Prepares and sends the request to Neo4j
+// Execute Prepares and sends the request to Neo4j
 // If the request is successful then parses the response
 func (batch *Batch) Execute() ([]*BatchResponse, error) {
 
@@ -230,7 +230,7 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	}
 
 	encodedRequest, err := jsonEncode(request)
-	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
+	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchURL, encodedRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func (batch *Batch) mapResponse(response []*BatchResponse) {
 	for _, val := range response {
 		// id is an Neo4j batch request feature, it returns back the id that we send
 		// so we can use it here to map results into our stack
-		id := val.Id
+		id := val.ID
 		batch.Stack[id].Data.mapBatchResponse(batch.Neo4j, val.Body)
 	}
 }

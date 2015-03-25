@@ -6,12 +6,14 @@ import (
 	"fmt"
 )
 
+// Node struct
 type Node struct {
-	Id      string
+	ID      string
 	Data    map[string]interface{}
 	Payload *NodeResponse
 }
 
+// NodeResponse struct for mapping nodes returned for Neo4J server
 type NodeResponse struct {
 	PagedTraverse              string                 `json:"paged_traverse"`
 	OutgoingRelationships      string                 `json:"outgoing_relationships"`
@@ -34,11 +36,11 @@ func (node *Node) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error)
 	if err != nil {
 		return false, err
 	}
-	id, err := getIdFromUrl(neo4j.NodeUrl, payload.Self)
+	id, err := getIDFromURL(neo4j.NodeURL, payload.Self)
 	if err != nil {
 		return false, nil
 	}
-	node.Id = id
+	node.ID = id
 	node.Data = payload.Data
 	node.Payload = payload
 
@@ -70,12 +72,12 @@ func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error
 func prepareNodeGetBatchMap(n *Node) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if n.Id == "" {
+	if n.ID == "" {
 		return query, errors.New("Id field is empty")
 	}
 
 	query["method"] = "GET"
-	query["to"] = fmt.Sprintf("/node/%s", n.Id)
+	query["to"] = fmt.Sprintf("/node/%s", n.ID)
 
 	return query, nil
 }
@@ -83,12 +85,12 @@ func prepareNodeGetBatchMap(n *Node) (map[string]interface{}, error) {
 func prepareNodeDeleteBatchMap(n *Node) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if n.Id == "" {
+	if n.ID == "" {
 		return query, errors.New("Id not valid")
 	}
 
 	query["method"] = "DELETE"
-	query["to"] = fmt.Sprintf("/node/%s", n.Id)
+	query["to"] = fmt.Sprintf("/node/%s", n.ID)
 
 	return query, nil
 }
@@ -104,12 +106,12 @@ func prepareNodeCreateBatchMap(n *Node) (map[string]interface{}, error) {
 func prepareNodeUpdateBatchMap(n *Node) (map[string]interface{}, error) {
 	query := make(map[string]interface{})
 
-	if n.Id == "" {
+	if n.ID == "" {
 		return query, errors.New("Id not valid")
 	}
 
 	query["method"] = "PUT"
-	query["to"] = fmt.Sprintf("/node/%s/properties", n.Id)
+	query["to"] = fmt.Sprintf("/node/%s/properties", n.ID)
 	query["body"] = n.Data
 
 	return query, nil
@@ -125,8 +127,8 @@ func prepareNodeCreateUniqueBatchMap(n *Node) (map[string]interface{}, error) {
 	}, nil
 }
 
-func (n *Node) encodeData() (string, error) {
-	result, err := jsonEncode(n.Data)
+func (node *Node) encodeData() (string, error) {
+	result, err := jsonEncode(node.Data)
 	return result, err
 }
 

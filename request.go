@@ -9,12 +9,15 @@ import (
 	"strings"
 )
 
+// ManuelRequest struct for create a custom Neo4J request
+// This is particularly used for creating Batch opeartion requests
 type ManuelRequest struct {
 	To     string
 	Params map[string]string
 	Body   map[string]string
 }
 
+// Get func
 func (mr *ManuelRequest) Get() ([]string, error) {
 	urlWithParams := mr.encodeParams()
 	req, err := http.NewRequest("GET", urlWithParams, nil)
@@ -30,6 +33,7 @@ func (mr *ManuelRequest) Get() ([]string, error) {
 	return resp, nil
 }
 
+// Delete func
 func (mr *ManuelRequest) Delete() error {
 	urlWithParams := mr.encodeParams()
 	req, err := http.NewRequest("DELETE", urlWithParams, nil)
@@ -60,6 +64,7 @@ func (mr *ManuelRequest) getDeleteHelper(req *http.Request) ([]string, error) {
 	return resp, nil
 }
 
+// Post func
 func (mr *ManuelRequest) Post() error {
 	body, err := jsonEncode(mr.Body)
 	if err != nil {
@@ -97,7 +102,7 @@ func (mr *ManuelRequest) decodeResponse(res *http.Response) ([]string, error) {
 			return nil, err
 		}
 
-		result := make([]string, 0)
+		var result = make([]string, 0)
 		err = json.Unmarshal(body, &result)
 		if err != nil {
 			return nil, err

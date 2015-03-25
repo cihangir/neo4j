@@ -34,7 +34,7 @@ func TestBatchWithOneNode(t *testing.T) {
 		t.Error("Response length is not valid")
 	}
 
-	if node.Id == "" {
+	if node.ID == "" {
 		t.Error("Node id is empty")
 	}
 
@@ -85,8 +85,8 @@ func TestBatchWithOneRelationship(t *testing.T) {
 	dataRel["dada"] = "gaga"
 	relationship.Data = dataRel
 	relationship.Type = "sampleType"
-	relationship.StartNodeId = node.Id
-	relationship.EndNodeId = node2.Id
+	relationship.StartNodeID = node.ID
+	relationship.EndNodeID = node2.ID
 
 	batchRel.Create(relationship)
 
@@ -98,7 +98,7 @@ func TestBatchWithOneRelationship(t *testing.T) {
 	if len(res) != 1 {
 		t.Error(len(res), "Response length is not valid")
 	}
-	if relationship.Id == "" {
+	if relationship.ID == "" {
 		t.Error("Relationhip is not created")
 	}
 }
@@ -208,8 +208,8 @@ func TestBatchWithRelationshipForAllRequests(t *testing.T) {
 	dataRel["dada"] = "gaga"
 	relationship.Data = dataRel
 	relationship.Type = "sampleType"
-	relationship.StartNodeId = node.Id
-	relationship.EndNodeId = node2.Id
+	relationship.StartNodeID = node.ID
+	relationship.EndNodeID = node2.ID
 
 	batchRel.Create(relationship)
 	res, err = batchRel.Execute()
@@ -221,7 +221,7 @@ func TestBatchWithRelationshipForAllRequests(t *testing.T) {
 		t.Error(len(res), "Response length is not valid")
 	}
 
-	if relationship.Id == "" {
+	if relationship.ID == "" {
 		t.Error("Relationship id is not set")
 	}
 
@@ -307,7 +307,7 @@ func TestBatchWithManualBatchQueryWithLabels(t *testing.T) {
 		t.Error(len(res), "Response length is not valid")
 	}
 
-	if node.Id == "" {
+	if node.ID == "" {
 		t.Error("node id is empty")
 	}
 }
@@ -368,7 +368,7 @@ func TestBatchWithManualBatchQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	if nodeRes.Id == "" {
+	if nodeRes.ID == "" {
 		t.Error("node id is empty")
 	}
 

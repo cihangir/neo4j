@@ -9,6 +9,7 @@ var (
 	UNIQUENESS_CREATE_OR_FAIL = "create_or_fail"
 )
 
+// Unique struct
 type Unique struct {
 	IndexName  string
 	Uniqueness string
@@ -16,6 +17,7 @@ type Unique struct {
 	Value      string
 }
 
+// UniqueRequest struct used in Batch operations
 type UniqueRequest struct {
 	Properties *Unique
 	Data       Batcher

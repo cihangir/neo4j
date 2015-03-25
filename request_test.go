@@ -5,7 +5,7 @@ package neo4j
 import "testing"
 
 func TestCreateAndDeleteEvents(t *testing.T) {
-	sourceId, eventId := createNodes("source", "event", t)
+	sourceID, eventID := createNodes("source", "event", t)
 
 	req := &ManuelRequest{
 		Method: "POST",
@@ -37,14 +37,14 @@ func TestCreateAndDeleteEvents(t *testing.T) {
 }
 
 func TestCreateAndDeleteSubscriptions(t *testing.T) {
-	streamId, sourceId := createNodes("stream", "source", t)
+	streamID, sourceID := createNodes("stream", "source", t)
 
 	req := &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/subscriptions",
 		Body: map[string]string{
-			"stream": streamId,
-			"source": sourceId,
+			"stream": streamID,
+			"source": sourceID,
 		},
 	}
 
@@ -57,8 +57,8 @@ func TestCreateAndDeleteSubscriptions(t *testing.T) {
 		Method: "DELETE",
 		To:     "http://localhost:7474/graphity/subscriptions",
 		Body: map[string]string{
-			"stream": streamId,
-			"source": sourceId,
+			"stream": streamID,
+			"source": sourceID,
 		},
 	}
 
@@ -69,14 +69,14 @@ func TestCreateAndDeleteSubscriptions(t *testing.T) {
 }
 
 func TestGetEvents(t *testing.T) {
-	streamId, sourceId := createNodes("stream", "source", t)
+	streamID, sourceID := createNodes("stream", "source", t)
 
 	req := &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/subscriptions",
 		Body: map[string]string{
-			"stream": streamId,
-			"source": sourceId,
+			"stream": streamID,
+			"source": sourceID,
 		},
 	}
 
@@ -85,14 +85,14 @@ func TestGetEvents(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, eventId := createNodes("_", "event", t)
+	_, eventID := createNodes("_", "event", t)
 
 	req = &ManuelRequest{
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/events",
 		Body: map[string]string{
-			"source":    sourceId,
-			"event":     eventId,
+			"source":    sourceID,
+			"event":     eventID,
 			"timestamp": "1",
 		},
 	}
@@ -108,8 +108,8 @@ func TestGetEvents(t *testing.T) {
 		Method: "POST",
 		To:     "http://localhost:7474/graphity/events",
 		Body: map[string]string{
-			"source":    sourceId,
-			"event":     eventId,
+			"source":    sourceID,
+			"event":     eventID,
 			"timestamp": "2",
 		},
 	}
@@ -138,7 +138,7 @@ func TestGetEvents(t *testing.T) {
 	}
 }
 
-func createNodes(nodeOneName, nodeTwoName string, t *testing.T) (nodeOneId, nodeTwoId string) {
+func createNodes(nodeOneName, nodeTwoName string, t *testing.T) (nodeOneID, nodeTwoID string) {
 	nodeOne := &Node{
 		Data: map[string]interface{}{"name": nodeOneName},
 	}

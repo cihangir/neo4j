@@ -32,7 +32,7 @@ func jsonDecode(data string, result *interface{}) error {
 }
 
 // Obtain id from incoming URL
-func getIdFromUrl(base, url string) (string, error) {
+func getIDFromURL(base, url string) (string, error) {
 	//add slash to end of base url,
 	//because before id there is a slash
 	target := base + "/"
