@@ -57,19 +57,19 @@ func (r *Relationship) getBatchQuery(operation string) (map[string]interface{}, 
 	query := make(map[string]interface{})
 
 	switch operation {
-	case BATCH_GET:
+	case BatchGet:
 		query, err := prepareRelationshipGetBatchMap(r)
 		return query, err
-	case BATCH_UPDATE:
+	case BatchUpdate:
 		query, err := prepareRelationshipUpdateBatchMap(r)
 		return query, err
-	case BATCH_CREATE:
+	case BatchCreate:
 		query, err := prepareRelationshipCreateBatchMap(r)
 		return query, err
-	case BATCH_DELETE:
+	case BatchDelete:
 		query, err := prepareRelationshipDeleteBatchMap(r)
 		return query, err
-	case BATCH_CREATE_UNIQUE:
+	case BatchCreateUnique:
 		query, err := prepareRelationshipCreateUniqueBatchMap(r)
 		return query, err
 	}

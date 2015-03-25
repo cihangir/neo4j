@@ -49,19 +49,19 @@ func (node *Node) mapBatchResponse(neo4j *Neo4j, data interface{}) (bool, error)
 
 func (node *Node) getBatchQuery(operation string) (map[string]interface{}, error) {
 	switch operation {
-	case BATCH_GET:
+	case BatchGet:
 		query, err := prepareNodeGetBatchMap(node)
 		return query, err
-	case BATCH_UPDATE:
+	case BatchUpdate:
 		query, err := prepareNodeUpdateBatchMap(node)
 		return query, err
-	case BATCH_CREATE:
+	case BatchCreate:
 		query, err := prepareNodeCreateBatchMap(node)
 		return query, err
-	case BATCH_DELETE:
+	case BatchDelete:
 		query, err := prepareNodeDeleteBatchMap(node)
 		return query, err
-	case BATCH_CREATE_UNIQUE:
+	case BatchCreateUnique:
 		query, err := prepareNodeCreateUniqueBatchMap(node)
 		return query, err
 	}

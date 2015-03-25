@@ -15,11 +15,11 @@ type Batcher interface {
 
 // Basic operation names
 var (
-	BATCH_GET           = "get"
-	BATCH_CREATE        = "create"
-	BATCH_DELETE        = "delete"
-	BATCH_UPDATE        = "update"
-	BATCH_CREATE_UNIQUE = "createUnique"
+	BatchGet          = "get"
+	BatchCreate       = "create"
+	BatchDelete       = "delete"
+	BatchUpdate       = "update"
+	BatchCreateUnique = "createUnique"
 )
 
 // Batch Base struct to support request
@@ -113,15 +113,15 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 	}
 
 	switch operation {
-	case BATCH_GET:
+	case BatchGet:
 		query["method"] = "GET"
-	case BATCH_UPDATE:
+	case BatchUpdate:
 		query["method"] = "PUT"
-	case BATCH_CREATE:
+	case BatchCreate:
 		query["method"] = "POST"
-	case BATCH_DELETE:
+	case BatchDelete:
 		query["method"] = "DELETE"
-	case BATCH_CREATE_UNIQUE:
+	case BatchCreateUnique:
 		query["method"] = "POST"
 		query["body"] = map[string]interface{}{
 			"properties": mbr.Body,
@@ -154,28 +154,28 @@ func (neo4j *Neo4j) NewBatch() *Batch {
 
 // Get request to Neo4j as batch
 func (batch *Batch) Get(obj Batcher) *Batch {
-	batch.addToStack(BATCH_GET, obj)
+	batch.addToStack(BatchGet, obj)
 
 	return batch
 }
 
 // Create request to Neo4j as batch
 func (batch *Batch) Create(obj Batcher) *Batch {
-	batch.addToStack(BATCH_CREATE, obj)
+	batch.addToStack(BatchCreate, obj)
 
 	return batch
 }
 
 // Delete request to Neo4j as batch
 func (batch *Batch) Delete(obj Batcher) *Batch {
-	batch.addToStack(BATCH_DELETE, obj)
+	batch.addToStack(BatchDelete, obj)
 
 	return batch
 }
 
 // Update request to Neo4j as batch
 func (batch *Batch) Update(obj Batcher) *Batch {
-	batch.addToStack(BATCH_UPDATE, obj)
+	batch.addToStack(BatchUpdate, obj)
 
 	return batch
 }
@@ -189,7 +189,7 @@ func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 		Data:       obj,
 	}
 
-	batch.addToStack(BATCH_CREATE_UNIQUE, uniqueRequest)
+	batch.addToStack(BatchCreateUnique, uniqueRequest)
 
 	return batch
 }

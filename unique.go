@@ -4,10 +4,10 @@ import (
 	"errors"
 )
 
-var (
-	UNIQUENESS_GET_OR_CREATE  = "get_or_create"
-	UNIQUENESS_CREATE_OR_FAIL = "create_or_fail"
-)
+// var (
+// 	UniquenessGetOrCreate  = "get_or_create"
+// 	UniquenessCreateOrFail = "create_or_fail"
+// )
 
 // Unique struct
 type Unique struct {
@@ -40,7 +40,7 @@ func (ur *UniqueRequest) getBatchQuery(operation string) (map[string]interface{}
 	// http://localhost:7474/db/data/index/relationship/knowledge/?uniqueness=get_or_create
 	// uniqueness := ur.Properties.Uniqueness
 	// if ur.Properties.Uniqueness == "" {
-	// 	uniqueness = UNIQUENESS_GET_OR_CREATE
+	// 	uniqueness = UniquenessGetOrCreate
 	// }
 
 	query["to"] = query["to"].(string) + "/" + ur.Properties.IndexName + "?unique" //=" + uniqueness
