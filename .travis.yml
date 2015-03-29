@@ -13,7 +13,6 @@ env:
     # test across multiple versions of Neo4j:
     - NEO4J_VERSION="2.1.5"
     - NEO4J_VERSION="2.0.4"
-    - NEO4J_VERSION="1.9.8"
 
 before_install:
     # install Neo4j locally:

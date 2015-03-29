@@ -34,3 +34,5 @@ go get github.com/siesta/neo4j
     neo4jConnection.Get(rel)
 
 ```
+
+if you want neo4j 1.9x support you can go to [v1](https://github.com/cihangir/neo4j/tree/v1) branch
