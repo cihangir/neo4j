@@ -60,6 +60,10 @@ func (neo4j *Neo4j) doRequest(requestType, url, data string) (string, error) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
+	if (neo4j.BasicAuthUser != "") && (neo4j.BasicAuthPassword != "") {
+		req.SetBasicAuth(neo4j.BasicAuthUser, neo4j.BasicAuthPassword)
+	}
+
 	// send request
 	res, err := neo4j.Client.Do(req)
 	if err != nil {
@@ -112,6 +116,10 @@ func (neo4j *Neo4j) doBatchRequest(requestType, url, data string) (string, error
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
+
+	if (neo4j.BasicAuthUser != "") && (neo4j.BasicAuthPassword != "") {
+		req.SetBasicAuth(neo4j.BasicAuthUser, neo4j.BasicAuthPassword)
+	}
 
 	res, err := neo4j.Client.Do(req)
 	if err != nil {
