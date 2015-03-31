@@ -163,8 +163,8 @@ func crateRelationship(neo4j *Neo4j, node *Node, node2 *Node) *Relationship {
 	dataRel["dada"] = "gaga"
 	relationship.Data = dataRel
 	relationship.Type = "sampleType"
-	relationship.StartNodeId = node.Id
-	relationship.EndNodeId = node2.Id
+	relationship.StartNodeID = node.ID
+	relationship.EndNodeID = node2.ID
 
 	return relationship
 

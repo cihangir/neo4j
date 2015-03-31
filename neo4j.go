@@ -4,13 +4,14 @@ import (
 	"net/http"
 )
 
+// Neo4j base struct
 type Neo4j struct {
 	Client          *http.Client
-	BaseUrl         string
-	NodeUrl         string
-	BatchUrl        string
-	RelationshipUrl string
-	IndexNodeUrl    string
+	BaseURL         string
+	NodeURL         string
+	BatchURL        string
+	RelationshipURL string
+	IndexNodeURL    string
 }
 
 // Connect creates the basic structure to send requests to neo4j rest endpoint.
@@ -40,21 +41,21 @@ func Connect(url string) *Neo4j {
 		url = "http://127.0.0.1:7474"
 	}
 
-	baseUrl := url + "/db/data"
+	baseURL := url + "/db/data"
 	// TODO get neo4j service root from neo4j itself
 	// http://docs.neo4j.org/chunked/stable/rest-api-service-root.html
 	return &Neo4j{
 		Client:          http.DefaultClient,
-		BaseUrl:         baseUrl,
-		NodeUrl:         baseUrl + "/node",
-		BatchUrl:        baseUrl + "/batch",
-		IndexNodeUrl:    baseUrl + "/index/node",
-		RelationshipUrl: baseUrl + "/relationship",
+		BaseURL:         baseURL,
+		NodeURL:         baseURL + "/node",
+		BatchURL:        baseURL + "/batch",
+		IndexNodeURL:    baseURL + "/index/node",
+		RelationshipURL: baseURL + "/relationship",
 	}
 }
 
-// This is the basic Get method for all types
-// It accepts only Bacther Interface
+// Get This is the basic Get method for all types
+// It accepts only Batcher Interface
 // Node and Relationship structs implement this interface
 //
 // Example usages;
@@ -77,6 +78,9 @@ func (neo4j *Neo4j) Get(obj Batcher) error {
 	return err
 }
 
+// Create is the basic Create method for all types
+// It accepts only Batcher Interface
+// Example Usages;
 // Relationship:
 //    dataRel         := make(map[string]interface{})
 //    dataRel["RelData"] = "DataOfTheRelationship"
@@ -95,12 +99,16 @@ func (neo4j *Neo4j) Create(obj Batcher) error {
 	return err
 }
 
+// Delete is the basic Delete method for all types
+// It accepts only Batcher Interface
 func (neo4j *Neo4j) Delete(obj Batcher) error {
 	_, err := neo4j.NewBatch().Delete(obj).Execute()
 
 	return err
 }
 
+// Update is the basic Update method for all types
+// It accepts only Batcher Interface
 func (neo4j *Neo4j) Update(obj Batcher) error {
 	_, err := neo4j.NewBatch().Update(obj).Execute()
 

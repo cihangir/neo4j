@@ -15,42 +15,43 @@ type Batcher interface {
 
 // Basic operation names
 var (
-	BATCH_GET           = "get"
-	BATCH_CREATE        = "create"
-	BATCH_DELETE        = "delete"
-	BATCH_UPDATE        = "update"
-	BATCH_CREATE_UNIQUE = "createUnique"
+	BatchGet          = "get"
+	BatchCreate       = "create"
+	BatchDelete       = "delete"
+	BatchUpdate       = "update"
+	BatchCreateUnique = "createUnique"
 )
 
-// Base struct to support request
+// Batch Base struct to support request
 type Batch struct {
 	Neo4j *Neo4j
 	Stack []*BatchRequest
 }
 
-// All batch request structs will be encapslated in this struct
+// BatchRequest All batch request structs will be encapslated in this struct
 type BatchRequest struct {
 	Operation string
 	Data      Batcher
 }
 
-// All returning results from Neo4j will be in BatchResponse format
+// BatchResponse All returning results from Neo4j will be in BatchResponse format
 type BatchResponse struct {
-	Id       int         `json:"id"`
+	ID       int         `json:"id"`
 	Location string      `json:"location"`
 	Body     interface{} `json:"body"`
 	From     string      `json:"from"`
 }
 
-//  ManuelBatchRequest is here to support referance passing requests in a transaction
+// ManuelBatchRequest is here to support referance passing requests in a transaction
 // For more information please check : http://docs.neo4j.org/chunked/stable/rest-api-batch-ops.html
 type ManuelBatchRequest struct {
-	To       string
-	Body     map[string]interface{}
-	Response interface{}
+	To         string
+	Body       map[string]interface{}
+	StringBody string
+	Response   interface{}
 }
 
-// Implement Batcher interface
+// GetManualBatchResponse Implements Batcher interface
 func (neo4j *Neo4j) GetManualBatchResponse(mbr *ManuelBatchRequest, result interface{}) error {
 
 	//get type of current value
@@ -104,18 +105,23 @@ func (mbr *ManuelBatchRequest) getBatchQuery(operation string) (map[string]inter
 	query := make(map[string]interface{})
 
 	query["to"] = mbr.To
-	query["body"] = mbr.Body
+
+	if mbr.StringBody != "" && (len(mbr.StringBody) > 0) {
+		query["body"] = mbr.StringBody
+	} else {
+		query["body"] = mbr.Body
+	}
 
 	switch operation {
-	case BATCH_GET:
+	case BatchGet:
 		query["method"] = "GET"
-	case BATCH_UPDATE:
+	case BatchUpdate:
 		query["method"] = "PUT"
-	case BATCH_CREATE:
+	case BatchCreate:
 		query["method"] = "POST"
-	case BATCH_DELETE:
+	case BatchDelete:
 		query["method"] = "DELETE"
-	case BATCH_CREATE_UNIQUE:
+	case BatchCreateUnique:
 		query["method"] = "POST"
 		query["body"] = map[string]interface{}{
 			"properties": mbr.Body,
@@ -130,7 +136,7 @@ func (mbr *ManuelBatchRequest) mapBatchResponse(neo4j *Neo4j, data interface{}) 
 	return true, nil
 }
 
-// Returns last index of current stack
+// GetLastIndex Returns last index of current stack
 // This method can be used to obtain the latest index for creating
 // manual batch requests or injecting the order number of pre-added request(s) id
 func (batch *Batch) GetLastIndex() string {
@@ -138,7 +144,7 @@ func (batch *Batch) GetLastIndex() string {
 	return strconv.Itoa(len(batch.Stack) - 1)
 }
 
-// Creates New Batch request handler
+// NewBatch Creates New Batch request handler
 func (neo4j *Neo4j) NewBatch() *Batch {
 	return &Batch{
 		Neo4j: neo4j,
@@ -148,33 +154,33 @@ func (neo4j *Neo4j) NewBatch() *Batch {
 
 // Get request to Neo4j as batch
 func (batch *Batch) Get(obj Batcher) *Batch {
-	batch.addToStack(BATCH_GET, obj)
+	batch.addToStack(BatchGet, obj)
 
 	return batch
 }
 
 // Create request to Neo4j as batch
 func (batch *Batch) Create(obj Batcher) *Batch {
-	batch.addToStack(BATCH_CREATE, obj)
+	batch.addToStack(BatchCreate, obj)
 
 	return batch
 }
 
 // Delete request to Neo4j as batch
 func (batch *Batch) Delete(obj Batcher) *Batch {
-	batch.addToStack(BATCH_DELETE, obj)
+	batch.addToStack(BatchDelete, obj)
 
 	return batch
 }
 
 // Update request to Neo4j as batch
 func (batch *Batch) Update(obj Batcher) *Batch {
-	batch.addToStack(BATCH_UPDATE, obj)
+	batch.addToStack(BatchUpdate, obj)
 
 	return batch
 }
 
-// Batch unique create request to Neo4j
+// CreateUnique Batch unique create request to Neo4j
 func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 
 	//encapsulating the object
@@ -183,7 +189,7 @@ func (batch *Batch) CreateUnique(obj Batcher, properties *Unique) *Batch {
 		Data:       obj,
 	}
 
-	batch.addToStack(BATCH_CREATE_UNIQUE, uniqueRequest)
+	batch.addToStack(BatchCreateUnique, uniqueRequest)
 
 	return batch
 }
@@ -199,7 +205,7 @@ func (batch *Batch) addToStack(operation string, obj Batcher) {
 	batch.Stack = append(batch.Stack, batchRequest)
 }
 
-// Prepares and sends the request to Neo4j
+// Execute Prepares and sends the request to Neo4j
 // If the request is successful then parses the response
 func (batch *Batch) Execute() ([]*BatchResponse, error) {
 
@@ -224,7 +230,7 @@ func (batch *Batch) Execute() ([]*BatchResponse, error) {
 	}
 
 	encodedRequest, err := jsonEncode(request)
-	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchUrl, encodedRequest)
+	res, err := batch.Neo4j.doBatchRequest("POST", batch.Neo4j.BatchURL, encodedRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +271,7 @@ func (batch *Batch) mapResponse(response []*BatchResponse) {
 	for _, val := range response {
 		// id is an Neo4j batch request feature, it returns back the id that we send
 		// so we can use it here to map results into our stack
-		id := val.Id
+		id := val.ID
 		batch.Stack[id].Data.mapBatchResponse(batch.Neo4j, val.Body)
 	}
 }

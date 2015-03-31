@@ -23,7 +23,7 @@ func TestSendCypherQuery(t *testing.T) {
 			"query": fmt.Sprintf(`
         START k=node(%v, %v)
         return id(k) as eventNodeId
-		  `, node.Id, node2.Id),
+		  `, node.ID, node2.ID),
 		},
 		Payload: map[string]interface{}{},
 	}

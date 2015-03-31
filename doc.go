@@ -1,3 +1,4 @@
+//Package neo4j - simple Neo4J REST API wrapper
 /*
 
 Neo4j Package uses Neo4j Graph Database REST API for providing access to go clients.

@@ -13,39 +13,39 @@ func TestDefaultConnection(t *testing.T) {
 		t.Error("Connection client is not set")
 	}
 
-	if neo4jConnection.BaseUrl == "" {
+	if neo4jConnection.BaseURL == "" {
 		t.Error("BaseUrl is not set")
 	}
 
-	if neo4jConnection.NodeUrl == "" {
+	if neo4jConnection.NodeURL == "" {
 		t.Error("NodeUrl is not set")
 	}
 
-	if neo4jConnection.RelationshipUrl == "" {
+	if neo4jConnection.RelationshipURL == "" {
 		t.Error("RelationshipUrl is not set")
 	}
 
-	if neo4jConnection.IndexNodeUrl == "" {
+	if neo4jConnection.IndexNodeURL == "" {
 		t.Error("IndexNodeUrl is not set")
 	}
 }
 
-func TestGetNodeWithEmptyId(t *testing.T) {
+func TestGetNodeWithEmptyID(t *testing.T) {
 	neo4jConnection := Connect("")
 
 	node := &Node{}
-	node.Id = ""
+	node.ID = ""
 	err := neo4jConnection.Get(node)
 	if err == nil {
 		t.Error("Error is nil")
 	}
 }
 
-func TestGetNodeWithInvalidId(t *testing.T) {
+func TestGetNodeWithInvalidID(t *testing.T) {
 	neo4jConnection := Connect("")
 
 	node := &Node{}
-	node.Id = "asdfasdfas"
+	node.ID = "asdfasdfas"
 	err := neo4jConnection.Get(node)
 	if err == nil {
 		t.Error("Error is nil")
@@ -56,7 +56,7 @@ func TestGetNodeReturnsErrorObjectOnError(t *testing.T) {
 	neo4jConnection := Connect("")
 
 	node := &Node{}
-	node.Id = "asdfasdfas"
+	node.ID = "asdfasdfas"
 	err := neo4jConnection.Get(node)
 	if err == nil {
 		t.Error("There must be error")
@@ -69,12 +69,12 @@ func TestGetNodeReturnsErrorObjectOnError(t *testing.T) {
 	}
 }
 
-func TestGetNodeWithIntMaxId(t *testing.T) {
+func TestGetNodeWithIntMaxID(t *testing.T) {
 	maxInt := strconv.Itoa(int(^uint(0) >> 1))
 	neo4jConnection := Connect("")
 
 	node := &Node{}
-	node.Id = maxInt
+	node.ID = maxInt
 	if err := neo4jConnection.Get(node); err == nil {
 		t.Error("There must be error")
 	}
@@ -142,8 +142,8 @@ func checkForSetValues(t *testing.T, node *Node, err error) {
 
 func checkForNil(t *testing.T, node *Node) {
 
-	if node.Id != "" {
-		t.Error("Id is set")
+	if node.ID != "" {
+		t.Error("ID is set")
 	}
 
 	if node.Data != nil {
@@ -251,12 +251,12 @@ func testCreatedNodeDeafultvalues(t *testing.T, node *Node, err error) {
 		t.Error("node creation returned err")
 	}
 
-	if node.Id == "" {
+	if node.ID == "" {
 		t.Error("Assigning node id doesnt work")
 	}
 }
 
-func TestUpdateNodeWithEmptyId(t *testing.T) {
+func TestUpdateNodeWithEmptyID(t *testing.T) {
 
 	node := &Node{}
 	neo4jConnection := Connect("")
@@ -278,7 +278,7 @@ func TestBatchApiWithNode(t *testing.T) {
 		t.Error("Error is not nil", err)
 	}
 
-	if node.Id == "" {
+	if node.ID == "" {
 		t.Error("Node id is nil")
 	}
 
@@ -346,14 +346,14 @@ func TestBatchApiWithRelationship(t *testing.T) {
 	dataRel["dada"] = "gaga"
 	relationship.Data = dataRel
 	relationship.Type = "sampleType"
-	relationship.StartNodeId = node.Id
-	relationship.EndNodeId = node2.Id
+	relationship.StartNodeID = node.ID
+	relationship.EndNodeID = node2.ID
 
 	if err := neo4jConnection.Create(relationship); err != nil {
 		t.Error("Error while creating relationship", err)
 	}
 
-	if relationship.Id == "" {
+	if relationship.ID == "" {
 		t.Error("Relationship is not created or id is not assigned")
 	}
 
@@ -368,8 +368,8 @@ func TestBatchApiWithRelationship(t *testing.T) {
 		t.Error("Update is not completed successfully")
 	}
 
-	if relationship.Id == "" {
-		t.Error("Id is missing after update")
+	if relationship.ID == "" {
+		t.Error("ID is missing after update")
 	}
 
 	// delete relationship
