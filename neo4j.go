@@ -2,16 +2,19 @@ package neo4j
 
 import (
 	"net/http"
+	"net/url"
 )
 
 // Neo4j base struct
 type Neo4j struct {
-	Client          *http.Client
-	BaseURL         string
-	NodeURL         string
-	BatchURL        string
-	RelationshipURL string
-	IndexNodeURL    string
+	Client            *http.Client
+	BaseURL           string
+	NodeURL           string
+	BatchURL          string
+	RelationshipURL   string
+	IndexNodeURL      string
+	BasicAuthUser     string
+	BasicAuthPassword string
 }
 
 // Connect creates the basic structure to send requests to neo4j rest endpoint.
@@ -36,21 +39,49 @@ type Neo4j struct {
 //     http://127.0.0.1:7474
 //
 // TODO implement cluster connection
-func Connect(url string) *Neo4j {
-	if url == "" {
-		url = "http://127.0.0.1:7474"
+func Connect(urlString string) *Neo4j {
+	if urlString == "" {
+		urlString = "http://127.0.0.1:7474"
 	}
 
-	baseURL := url + "/db/data"
+	var username string
+	var password string
+	var baseURL string
+
+	u, parseErr := url.Parse(urlString)
+	if parseErr != nil {
+		baseURL = urlString + "/db/data"
+		username = ""
+		password = ""
+	} else {
+
+		if u.User != nil {
+			p, ok := u.User.Password()
+			if ok {
+				username, password = u.User.Username(), p
+			} else {
+				username, password = "", ""
+			}
+			baseURL = u.Scheme + "://" + u.Host + "/db/data"
+		} else {
+			baseURL = urlString + "/db/data"
+			username = ""
+			password = ""
+		}
+
+	}
+
 	// TODO get neo4j service root from neo4j itself
 	// http://docs.neo4j.org/chunked/stable/rest-api-service-root.html
 	return &Neo4j{
-		Client:          http.DefaultClient,
-		BaseURL:         baseURL,
-		NodeURL:         baseURL + "/node",
-		BatchURL:        baseURL + "/batch",
-		IndexNodeURL:    baseURL + "/index/node",
-		RelationshipURL: baseURL + "/relationship",
+		Client:            http.DefaultClient,
+		BaseURL:           baseURL,
+		NodeURL:           baseURL + "/node",
+		BatchURL:          baseURL + "/batch",
+		IndexNodeURL:      baseURL + "/index/node",
+		RelationshipURL:   baseURL + "/relationship",
+		BasicAuthUser:     username,
+		BasicAuthPassword: password,
 	}
 }
 
